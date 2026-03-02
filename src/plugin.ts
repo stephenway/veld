@@ -12,14 +12,23 @@ import writeJson, { type WriteJsonOptions } from "./writer/writer-json";
 import writeMarkdown, { type WriteMarkdownOptions } from "./writer/writer-markdown";
 import writeTsDefinitions, { type WriteTsDefinitionsOptions } from "./writer/writer-ts-definitions";
 
+/** Structured warning for debug output. */
+export interface SveldWarning {
+  code: string;
+  message: string;
+  file?: string;
+}
+
 export interface PluginSveldOptions {
   /**
    * Specify the entry point to uncompiled Svelte source.
    * If not provided, sveld will use the "svelte" field from package.json.
    */
   entry?: string;
-  /** Include extractionMode in JSON output (legacy vs svelte5-fallback). */
+  /** Include extractionMode and warnings in JSON output. */
   debug?: boolean;
+  /** Warnings collected during run (e.g. Rollup compile failure). Only included in JSON when debug. */
+  warnings?: SveldWarning[];
   glob?: boolean;
   types?: boolean;
   typesOptions?: Partial<Omit<WriteTsDefinitionsOptions, "inputDir">>;
@@ -324,6 +333,7 @@ export function writeOutput(result: GenerateBundleResult, opts: PluginSveldOptio
       input,
       inputDir,
       debug: opts?.debug,
+      warnings: opts?.warnings,
     });
   }
 

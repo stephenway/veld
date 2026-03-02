@@ -2,7 +2,7 @@ import resolve from "@rollup/plugin-node-resolve";
 import { rollup } from "rollup";
 import svelte from "rollup-plugin-svelte";
 import { getSvelteEntry } from "./get-svelte-entry";
-import { generateBundle, type PluginSveldOptions, writeOutput } from "./plugin";
+import { generateBundle, type PluginSveldOptions, type SveldWarning, writeOutput } from "./plugin";
 
 /**
  * Command-line interface for sveld.
@@ -37,6 +37,7 @@ export async function cli(process: NodeJS.Process) {
     );
 
   const input = getSvelteEntry(options?.entry as string | undefined) || (options?.entry as string) || "src/index.js";
+  const warnings: SveldWarning[] = [];
 
   try {
     const rollup_bundle = await rollup({
@@ -44,11 +45,17 @@ export async function cli(process: NodeJS.Process) {
       plugins: [svelte(), resolve()],
     });
     await rollup_bundle.generate({});
-  } catch {
-    // Rollup may fail for Svelte 5 syntax; generateBundle uses its own parsing.
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    const file = err && typeof err === "object" && "id" in err ? String((err as { id?: string }).id) : undefined;
+    warnings.push({
+      code: "SVELTE5_COMPILE_FAILED",
+      message: `Rollup/Svelte compile failed; using fallback extraction. ${message}`,
+      file: file ?? input,
+    });
   }
 
   const result = await generateBundle(input, options?.glob === true);
 
-  writeOutput(result, { ...options, debug: options?.debug === true }, input);
+  writeOutput(result, { ...options, debug: options?.debug === true, warnings }, input);
 }

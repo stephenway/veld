@@ -10,7 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Added**
 
 - CLI integration tests: run the real CLI against Svelte 5 and legacy workdirs, compare to snapshots
-- `--debug` flag: include `extractionMode` in JSON output (`"legacy"` vs `"svelte5-fallback"`)
+- `--debug` flag: include `extractionMode` and `warnings` in JSON output (`"legacy"` vs `"svelte5-fallback"`)
+- Structured warnings channel: when Rollup fails (e.g. Svelte 5 syntax), `--debug` JSON includes `warnings: [{ code: "SVELTE5_COMPILE_FAILED", message, file }]`
+- `bun run update-goldens` script to update fixture and CLI snapshots
 - Svelte 5 runes support: extract prop documentation from `$props()` destructuring
   - Supports `let { foo = 123 }: Props = $props()` with interface or inline type
   - Supports `Snippet` typed children

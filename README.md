@@ -312,7 +312,7 @@ TypeScript definitions are outputted to the `types` folder by default. Don't for
 ### Plugin Options
 
 - **`entry`** (string, optional): Specify the entry point to uncompiled Svelte source. If not provided, sveld will use the `"svelte"` field from `package.json`.
-- **`debug`** (boolean, optional): Include `extractionMode` (`"legacy"` or `"svelte5-fallback"`) in JSON output. Useful to see which extraction path was used.
+- **`debug`** (boolean, optional): Include `extractionMode` and `warnings` in JSON output. When Rollup fails (e.g. Svelte 5 syntax), `warnings` contains structured entries like `{ code: "SVELTE5_COMPILE_FAILED", message, file }`.
 - **`glob`** (boolean, optional): Enable glob mode to analyze all `*.svelte` files.
 - **`types`** (boolean, optional, default: `true`): Generate TypeScript definitions.
 - **`typesOptions`** (object, optional): Options for TypeScript definition generation.

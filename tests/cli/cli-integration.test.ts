@@ -126,6 +126,30 @@ describe("CLI integration", () => {
     }
   });
 
+  test("JSON includes warnings with --debug when Rollup fails (Svelte 5)", async () => {
+    const workdirSrc = join(PROJECT_ROOT, "tests/cli/workdir-svelte5");
+    copyWorkdir(workdirSrc, tempDir);
+
+    runCli(tempDir, ["--json", "--glob", "--entry=./src/index.js", "--debug"]);
+
+    const json = JSON.parse(readFileSync(join(tempDir, "COMPONENT_API.json"), "utf-8"));
+    expect(json.warnings).toBeDefined();
+    expect(Array.isArray(json.warnings)).toBe(true);
+    const compileFailed = json.warnings.find((w: { code: string }) => w.code === "SVELTE5_COMPILE_FAILED");
+    expect(compileFailed).toBeDefined();
+    expect(compileFailed.message).toContain("Rollup/Svelte compile failed");
+  });
+
+  test("JSON omits warnings by default", async () => {
+    const workdirSrc = join(PROJECT_ROOT, "tests/cli/workdir-svelte5");
+    copyWorkdir(workdirSrc, tempDir);
+
+    runCli(tempDir, ["--json", "--glob", "--entry=./src/index.js"]);
+
+    const json = JSON.parse(readFileSync(join(tempDir, "COMPONENT_API.json"), "utf-8"));
+    expect(json.warnings).toBeUndefined();
+  });
+
   test("file ordering is stable across runs", async () => {
     const workdirSrc = join(PROJECT_ROOT, "tests/cli/workdir-svelte5");
     copyWorkdir(workdirSrc, tempDir);
