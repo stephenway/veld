@@ -4,6 +4,8 @@ import type {
   ArrowFunctionExpression,
   BinaryExpression,
   CallExpression,
+  ExportDefaultDeclaration,
+  ExportNamedDeclaration,
   Expression,
   FunctionExpression,
   Identifier,
@@ -17,8 +19,9 @@ import type {
   VariableDeclaration,
   VariableDeclarator,
 } from "estree";
-import type { Node } from "estree-walker";
-import { compile, parse, walk } from "svelte/compiler";
+import type { Node } from "estree";
+import { walk } from "estree-walker";
+import { compile, parse } from "svelte/compiler";
 import type { Ast, TemplateNode, Var } from "svelte/types/compiler/interfaces";
 import { extractSvelte5PropsFromSource } from "./extractors/svelte5Props";
 import { getElementByTag } from "./element-tag-map";
@@ -1077,7 +1080,7 @@ export default class ComponentParser {
    * indicating they can change and trigger reactivity in Svelte.
    */
   private collectReactiveVars() {
-    const reactiveVars = this.compiled?.vars.filter(({ reassigned, writable }) => reassigned && writable) ?? [];
+    const reactiveVars = (this.compiled?.vars ?? []).filter(({ reassigned, writable }) => reassigned && writable);
     for (const { name } of reactiveVars) {
       this.reactive_vars.add(name);
     }
@@ -2585,12 +2588,14 @@ export default class ComponentParser {
     if (this.parsed?.module) {
       walk(this.parsed?.module as unknown as Node, {
         enter: (node) => {
-          if (node.type === "ExportNamedDeclaration") {
+          const n = node as Node;
+          if (n.type === "ExportNamedDeclaration") {
+            const exp = n as ExportNamedDeclaration;
             /**
              * Skip re-exports (e.g., export { A, B } from 'library').
              * These don't have declarations in the current file, so we can't extract metadata.
              */
-            if (node.declaration == null) {
+            if (exp.declaration == null) {
               return;
             }
 
@@ -2598,7 +2603,7 @@ export default class ComponentParser {
              * Handle both VariableDeclaration and FunctionDeclaration exports.
              * Both can be exported from the module script and need type extraction.
              */
-            if (!node.declaration || typeof node.declaration !== "object" || !("type" in node.declaration)) {
+            if (!exp.declaration || typeof exp.declaration !== "object" || !("type" in exp.declaration)) {
               return;
             }
 
@@ -2612,8 +2617,8 @@ export default class ComponentParser {
             let params: ComponentPropParam[] | undefined;
             let returnType: string | undefined;
 
-            if (node.declaration.type === "FunctionDeclaration") {
-              const funcDecl = node.declaration as { id?: { name?: string } };
+            if (exp.declaration.type === "FunctionDeclaration") {
+              const funcDecl = exp.declaration as { id?: { name?: string } };
               if (!funcDecl.id || !funcDecl.id.name) return;
               prop_name = funcDecl.id.name;
               kind = "function";
@@ -2621,8 +2626,8 @@ export default class ComponentParser {
               type = "() => any";
               isFunction = true;
               isFunctionDeclaration = true;
-            } else if (node.declaration.type === "VariableDeclaration") {
-              const varDecl = node.declaration as VariableDeclaration;
+            } else if (exp.declaration.type === "VariableDeclaration") {
+              const varDecl = exp.declaration as VariableDeclaration;
               const firstDeclarator = varDecl.declarations[0];
               if (!firstDeclarator || typeof firstDeclarator !== "object" || !("id" in firstDeclarator)) {
                 return;
@@ -2647,8 +2652,8 @@ export default class ComponentParser {
               return;
             }
 
-            if (node.leadingComments) {
-              const jsdocInfo = this.processJSDocComment(node.leadingComments);
+            if (exp.leadingComments) {
+              const jsdocInfo = this.processJSDocComment(exp.leadingComments);
               if (jsdocInfo) {
                 if (jsdocInfo.type) type = jsdocInfo.type;
                 params = jsdocInfo.params;
@@ -2720,7 +2725,7 @@ export default class ComponentParser {
           }
 
           if (calleeName === "setContext") {
-            this.parseSetContextCall(node, parent ?? undefined);
+            this.parseSetContextCall(node as Node, (parent as Node) ?? undefined);
           }
 
           if (calleeName) {
@@ -2795,10 +2800,11 @@ export default class ComponentParser {
         }
 
         if (node.type === "ExportNamedDeclaration") {
+          const exp = node as ExportNamedDeclaration;
           /**
            * Handle export {} - empty export statement, nothing to extract.
            */
-          if (node.declaration == null && node.specifiers.length === 0) {
+          if (exp.declaration == null && (exp.specifiers?.length ?? 0) === 0) {
             return;
           }
 
@@ -2807,8 +2813,8 @@ export default class ComponentParser {
            * We need to find the original declaration and use the exported name as the prop name.
            */
           let prop_name: string;
-          if (node.declaration == null && node.specifiers[0]?.type === "ExportSpecifier") {
-            const specifier = node.specifiers[0];
+          if (exp.declaration == null && exp.specifiers?.[0]?.type === "ExportSpecifier") {
+            const specifier = exp.specifiers[0];
             const localName =
               specifier.local && typeof specifier.local === "object" && "name" in specifier.local
                 ? (specifier.local as Identifier).name
@@ -2839,7 +2845,7 @@ export default class ComponentParser {
                 break;
               }
             }
-            node.declaration = declaration;
+            (exp as { declaration?: VariableDeclaration }).declaration = declaration;
             prop_name = exportedName;
           }
 
@@ -2847,7 +2853,7 @@ export default class ComponentParser {
            * Skip re-exports (e.g., export { A, B } from 'library').
            * These don't have declarations in the current file.
            */
-          if (node.declaration == null) {
+          if (exp.declaration == null) {
             return;
           }
 
@@ -2855,7 +2861,7 @@ export default class ComponentParser {
            * Handle both VariableDeclaration and FunctionDeclaration.
            * Both can be exported as props from the component.
            */
-          if (!node.declaration || typeof node.declaration !== "object" || !("type" in node.declaration)) {
+          if (!exp.declaration || typeof exp.declaration !== "object" || !("type" in exp.declaration)) {
             return;
           }
 
@@ -2869,8 +2875,8 @@ export default class ComponentParser {
           let returnType: string | undefined;
           let isRequired = false;
 
-          if (node.declaration.type === "FunctionDeclaration") {
-            const funcDecl = node.declaration as { id?: { name?: string } };
+          if (exp.declaration.type === "FunctionDeclaration") {
+            const funcDecl = exp.declaration as { id?: { name?: string } };
             if (!funcDecl.id || !funcDecl.id.name) return;
             prop_name ??= funcDecl.id.name;
             kind = "function";
@@ -2879,8 +2885,8 @@ export default class ComponentParser {
             isFunction = true;
             isFunctionDeclaration = true;
             isRequired = false;
-          } else if (node.declaration.type === "VariableDeclaration") {
-            const varDecl = node.declaration as VariableDeclaration;
+          } else if (exp.declaration.type === "VariableDeclaration") {
+            const varDecl = exp.declaration as VariableDeclaration;
             const firstDeclarator = varDecl.declarations[0];
             if (!firstDeclarator || typeof firstDeclarator !== "object" || !("id" in firstDeclarator)) {
               return;
@@ -2907,8 +2913,8 @@ export default class ComponentParser {
             return;
           }
 
-          if (node.leadingComments) {
-            const jsdocInfo = this.processJSDocComment(node.leadingComments);
+          if (exp.leadingComments) {
+            const jsdocInfo = this.processJSDocComment(exp.leadingComments);
             if (jsdocInfo) {
               if (jsdocInfo.type) type = jsdocInfo.type;
               params = jsdocInfo.params;

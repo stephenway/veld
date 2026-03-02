@@ -765,17 +765,17 @@ function genModuleExports(def: Pick<ComponentDocApi, "moduleExports">) {
 
 export function writeTsDefinition(component: ComponentDocApi) {
   const {
-    moduleName,
-    typedefs,
+    moduleName = "",
+    typedefs = [],
     generics,
-    props,
-    moduleExports,
-    slots,
-    events,
+    props = [],
+    moduleExports = [],
+    slots = [],
+    events = [],
     rest_props,
     extends: _extends,
     componentComment,
-    contexts,
+    contexts = [],
   } = component;
   const { props_name, prop_def } = genPropDef({
     moduleName,
