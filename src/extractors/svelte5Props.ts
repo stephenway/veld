@@ -134,19 +134,54 @@ function getPropertyInfoFromTypeLiteral(
 }
 
 /**
- * Gets JSDoc description from a node's leading comment.
+ * Formats JSDoc block content to a single-line description.
  */
-function getJSDocFromNode(node: ts.Node, sourceFile: ts.SourceFile): string | undefined {
-  const fullText = sourceFile.getFullText();
-  const start = node.getStart(sourceFile);
-  const beforeNode = fullText.slice(0, start);
-  const matches = [...beforeNode.matchAll(new RegExp(JSDOC_BLOCK_REGEX.source, "g"))];
-  const blockMatch = matches.at(-1);
-  if (!blockMatch) return undefined;
-  const content = blockMatch[1]
+function formatJSDocContent(blockContent: string): string {
+  return blockContent
     .replace(/^\s*\*\s?/gm, "")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+/**
+ * Gets JSDoc description from a node's leading comment.
+ * Prefers node.jsDoc when present; otherwise scans backwards but stops at
+ * another property signature so comments are not mis-associated.
+ */
+function getJSDocFromNode(node: ts.Node, sourceFile: ts.SourceFile): string | undefined {
+  const fullText = sourceFile.getFullText();
+  const nodeStart = node.getStart(sourceFile);
+
+  if (ts.isPropertySignature(node)) {
+    const jsDoc = (node as ts.Node & { jsDoc?: ts.JSDoc[] }).jsDoc;
+    if (jsDoc?.length) {
+      const last = jsDoc[jsDoc.length - 1];
+      const content = last.getText(sourceFile).replace(/^\/\*\*|\*\/$/g, "").trim();
+      return formatJSDocContent(content) || undefined;
+    }
+
+    const parent = node.parent;
+    if (parent && (ts.isInterfaceDeclaration(parent) || ts.isTypeLiteralNode(parent))) {
+      const members = parent.members as ts.NodeArray<ts.TypeElement>;
+      const idx = members.indexOf(node as ts.TypeElement);
+      const searchStart = idx > 0 ? members[idx - 1].getEnd() : parent.getStart(sourceFile);
+      const beforeNode = fullText.slice(searchStart, nodeStart);
+      const matches = [...beforeNode.matchAll(new RegExp(JSDOC_BLOCK_REGEX.source, "g"))];
+      const blockMatch = matches.at(-1);
+      if (!blockMatch) return undefined;
+      const jsDocEndInSlice = (blockMatch.index ?? 0) + blockMatch[0].length;
+      const between = beforeNode.slice(jsDocEndInSlice);
+      if (/[^\s]/.test(between)) return undefined;
+      const content = formatJSDocContent(blockMatch[1]);
+      return content || undefined;
+    }
+  }
+
+  const beforeNode = fullText.slice(0, nodeStart);
+  const matches = [...beforeNode.matchAll(new RegExp(JSDOC_BLOCK_REGEX.source, "g"))];
+  const blockMatch = matches.at(-1);
+  if (!blockMatch) return undefined;
+  const content = formatJSDocContent(blockMatch[1]);
   return content || undefined;
 }
 

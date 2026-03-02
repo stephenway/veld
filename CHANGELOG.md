@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 **Added**
 
+- CLI integration tests: run the real CLI against Svelte 5 and legacy workdirs, compare to snapshots
+- `--debug` flag: include `extractionMode` in JSON output (`"legacy"` vs `"svelte5-fallback"`)
 - Svelte 5 runes support: extract prop documentation from `$props()` destructuring
   - Supports `let { foo = 123 }: Props = $props()` with interface or inline type
   - Supports `Snippet` typed children
@@ -19,6 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Auto-detects Svelte 5 syntax; no feature flag required
   - JSDoc descriptions from interface/type property signatures
   - Existing Svelte 3/4 fixtures and outputs unchanged
+
+**Fixed**
+
+- JSDoc association: comments no longer mis-attach to the wrong property when multiple props have JSDoc blocks; scan stops at previous property signature
 
 ## [0.26.2](https://github.com/carbon-design-system/sveld/releases/tag/v0.26.2) - 2026-02-16
 

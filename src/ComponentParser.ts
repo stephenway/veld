@@ -537,6 +537,8 @@ export interface ParsedComponent {
   componentComment?: string;
   /** Contexts created with `setContext` in the component */
   contexts?: ComponentContext[];
+  /** Extraction path used: legacy (Svelte 4 compiler) or svelte5-fallback (runes). Omitted unless --debug. */
+  extractionMode?: "legacy" | "svelte5-fallback";
 }
 
 export default class ComponentParser {
@@ -2558,6 +2560,7 @@ export default class ComponentParser {
             extends: undefined,
             componentComment: undefined,
             contexts: [],
+            extractionMode: "svelte5-fallback",
           };
         }
       }
@@ -3296,6 +3299,7 @@ export default class ComponentParser {
       extends: this.extends,
       componentComment: this.componentComment,
       contexts: contextsArray,
+      extractionMode: "legacy",
     };
   }
 }

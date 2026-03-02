@@ -149,10 +149,11 @@ veld supports Svelte 5 components that use the `$props()` rune. When the Svelte 
 - `$derived` / `$derived.by` / `$state` values
 - Rest element: `let { a, ...rest } = $props();` — `rest` is not a prop
 
-**Limitations:**
+**Limitations (Svelte 5 fallback path):**
 
 - No cross-file type resolution. The `Props` interface must be defined in the same script.
-- Slots and events for Svelte 5 runes components are not yet extracted (requires Svelte 5 compiler). Only props are documented.
+- **Slots and events are not extracted.** The fallback uses TypeScript-based extraction of `$props()` only. Slots, forwarded events, and dispatched events require the Svelte 5 compiler and are omitted in the fallback path.
+- Only props are documented. Use `--debug` with the CLI to see `extractionMode: "svelte5-fallback"` in JSON output when the fallback path is used.
 
 ## Approach
 
@@ -311,6 +312,7 @@ TypeScript definitions are outputted to the `types` folder by default. Don't for
 ### Plugin Options
 
 - **`entry`** (string, optional): Specify the entry point to uncompiled Svelte source. If not provided, sveld will use the `"svelte"` field from `package.json`.
+- **`debug`** (boolean, optional): Include `extractionMode` (`"legacy"` or `"svelte5-fallback"`) in JSON output. Useful to see which extraction path was used.
 - **`glob`** (boolean, optional): Enable glob mode to analyze all `*.svelte` files.
 - **`types`** (boolean, optional, default: `true`): Generate TypeScript definitions.
 - **`typesOptions`** (object, optional): Options for TypeScript definition generation.

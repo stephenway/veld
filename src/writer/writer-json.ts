@@ -8,6 +8,8 @@ export interface WriteJsonOptions {
   inputDir: string;
   outFile: string;
   outDir?: string;
+  /** Include extractionMode in component objects. */
+  debug?: boolean;
 }
 
 /**
@@ -36,11 +38,22 @@ interface JsonOutput {
  * // Output: components with normalized absolute paths, sorted by name
  * ```
  */
-function transformAndSortComponents(components: ComponentDocs, inputDir: string): ComponentDocApi[] {
-  return Array.from(components, ([_moduleName, component]) => ({
-    ...component,
-    filePath: normalizeSeparators(path.join(inputDir, path.normalize(component.filePath))),
-  })).sort((a, b) => a.moduleName.localeCompare(b.moduleName));
+function transformAndSortComponents(
+  components: ComponentDocs,
+  inputDir: string,
+  debug?: boolean,
+): ComponentDocApi[] {
+  return Array.from(components, ([_moduleName, component]) => {
+    const base = {
+      ...component,
+      filePath: normalizeSeparators(path.join(inputDir, path.normalize(component.filePath))),
+    };
+    if (!debug && "extractionMode" in base) {
+      const { extractionMode: _, ...rest } = base;
+      return rest as ComponentDocApi;
+    }
+    return base;
+  }).sort((a, b) => a.moduleName.localeCompare(b.moduleName));
 }
 
 /**
@@ -62,7 +75,7 @@ function transformAndSortComponents(components: ComponentDocs, inputDir: string)
  * ```
  */
 async function writeJsonComponents(components: ComponentDocs, options: WriteJsonOptions) {
-  const output = transformAndSortComponents(components, options.inputDir);
+  const output = transformAndSortComponents(components, options.inputDir, options.debug);
 
   await Promise.all(
     output.map((c) => {
@@ -95,7 +108,7 @@ async function writeJsonComponents(components: ComponentDocs, options: WriteJson
 async function writeJsonLocal(components: ComponentDocs, options: WriteJsonOptions) {
   const output: JsonOutput = {
     total: components.size,
-    components: transformAndSortComponents(components, options.inputDir),
+    components: transformAndSortComponents(components, options.inputDir, options.debug),
   };
 
   const output_path = path.join(process.cwd(), options.outFile);

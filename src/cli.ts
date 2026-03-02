@@ -36,15 +36,19 @@ export async function cli(process: NodeJS.Process) {
       {} as Record<string, string | boolean>,
     );
 
-  const input = getSvelteEntry() || "src/index.js";
-  const rollup_bundle = await rollup({
-    input,
-    plugins: [svelte(), resolve()],
-  });
+  const input = getSvelteEntry(options?.entry as string | undefined) || (options?.entry as string) || "src/index.js";
 
-  await rollup_bundle.generate({});
+  try {
+    const rollup_bundle = await rollup({
+      input,
+      plugins: [svelte(), resolve()],
+    });
+    await rollup_bundle.generate({});
+  } catch {
+    // Rollup may fail for Svelte 5 syntax; generateBundle uses its own parsing.
+  }
 
   const result = await generateBundle(input, options?.glob === true);
 
-  writeOutput(result, options, input);
+  writeOutput(result, { ...options, debug: options?.debug === true }, input);
 }

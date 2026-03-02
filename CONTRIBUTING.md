@@ -55,6 +55,23 @@ CI=false bun test tests/fixtures.test.ts --update-snapshots
 
 **Svelte 5 runes fixtures:** Use `tests/fixtures/svelte5-runes/<Name>/input.svelte`. Module names are derived from the path (e.g. `svelte5-runes/Tooltip` → `Svelte5RunesTooltip`).
 
+### CLI integration tests
+
+CLI integration tests run the actual `sveld` CLI against test workdirs and compare output to snapshots. Workdirs:
+
+- `tests/cli/workdir-svelte5/` – Svelte 5 runes components
+- `tests/cli/workdir-legacy/` – Svelte 3/4 components
+
+**Updating CLI goldens:**
+
+```sh
+CI=false bun test tests/cli/cli-integration.test.ts --update-snapshots
+```
+
+Then commit `tests/cli/__snapshots__/cli-integration.test.ts.snap`.
+
+**Note:** Ensure `bun run build` has been run so `cli.js` exists. Tests use temp directories and normalize paths for stable snapshots.
+
 ### End-to-end (e2e) tests
 
 Because this library is written in TypeScript, it must be transpiled to JavaScript before it can be used by e2e tests in the `tests/e2e` folder.

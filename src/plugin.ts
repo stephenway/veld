@@ -18,6 +18,8 @@ export interface PluginSveldOptions {
    * If not provided, sveld will use the "svelte" field from package.json.
    */
   entry?: string;
+  /** Include extractionMode in JSON output (legacy vs svelte5-fallback). */
+  debug?: boolean;
   glob?: boolean;
   types?: boolean;
   typesOptions?: Partial<Omit<WriteTsDefinitionsOptions, "inputDir">>;
@@ -113,7 +115,8 @@ export async function generateBundle(input: string, glob: boolean) {
   const allComponents: ParsedExports = { ...exports };
 
   if (glob) {
-    for (const file of globSync([`${dir}/**/*.svelte`])) {
+    const globFiles = globSync([`${dir}/**/*.svelte`]).sort();
+    for (const file of globFiles) {
       const moduleName = parse(file).name.replace(HYPHEN_REGEX, "");
       const source = normalizeSeparators(`./${relative(dir, file)}`);
 
@@ -320,6 +323,7 @@ export function writeOutput(result: GenerateBundleResult, opts: PluginSveldOptio
       ...opts?.jsonOptions,
       input,
       inputDir,
+      debug: opts?.debug,
     });
   }
 

@@ -123,6 +123,37 @@ let { text, children }: Props = $props();
     expect(props[0]).toMatchObject({ name: "text", description: "The tooltip text to display" });
     expect(props[1]).toMatchObject({ name: "children", description: "Child content that triggers the tooltip" });
   });
+
+  test("JSDoc attaches to correct property when two props with comment separated by another", () => {
+    const script = `
+interface Props {
+  /** Comment for foo only */
+  foo: string;
+  /** Comment for bar only */
+  bar: number;
+}
+let { foo, bar }: Props = $props();
+`;
+    const props = extractSvelte5Props(script);
+    expect(props).toHaveLength(2);
+    expect(props[0]).toMatchObject({ name: "foo", description: "Comment for foo only" });
+    expect(props[1]).toMatchObject({ name: "bar", description: "Comment for bar only" });
+  });
+
+  test("does NOT grab last comment when it belongs to another property", () => {
+    const script = `
+interface Props {
+  /** This comment belongs to foo */
+  foo: string;
+  bar: number;
+}
+let { foo, bar }: Props = $props();
+`;
+    const props = extractSvelte5Props(script);
+    expect(props).toHaveLength(2);
+    expect(props[0]).toMatchObject({ name: "foo", description: "This comment belongs to foo" });
+    expect(props[1].description).toBeUndefined();
+  });
 });
 
 describe("extractSvelte5PropsFromSource", () => {
