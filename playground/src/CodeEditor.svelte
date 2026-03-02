@@ -42,11 +42,10 @@
     */
 
   :global(.CodeMirror) {
-    font-family: var(--cds-code-02-font-family);
-    font-size: var(--cds-code-02-font-size);
-    font-weight: var(--cds-code-02-font-weight);
-    letter-spacing: var(--cds-code-02-letter-spacing);
-    line-height: var(--cds-code-02-line-height);
+    font-family: ui-monospace, monospace;
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.5;
     height: calc(100vh - 13rem);
     padding: 1rem 0.75rem;
   }
@@ -58,7 +57,7 @@
   }
 
   :global(.cm-s-zenburn.CodeMirror) {
-    background-color: var(--cds-ui-01);
+    background-color: var(--brand-charcoal);
   }
 
   /** Hide the cursor if the editor is blurred */
@@ -104,13 +103,13 @@
   }
 
   :global(.CodeMirror ::-webkit-scrollbar-track) {
-    background: var(--cds-ui-02);
+    background: var(--brand-ash);
     border-radius: 10px;
   }
 
   :global(.CodeMirror ::-webkit-scrollbar-thumb) {
     border-radius: 10px;
-    background: var(--cds-ui-04);
+    background: var(--brand-espresso-light);
   }
 
   :global(.CodeMirror-vscrollbar) {

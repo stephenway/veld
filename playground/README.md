@@ -1,12 +1,12 @@
 # veld Playground
 
-Interactive playground for testing veld's component extraction. Uses `@rasterandstate/majestic-ui` for the UI.
+Interactive playground for testing veld's component extraction. Uses Svelte 5 and `@rasterandstate/majestic-ui` (tokens, styling).
 
 ## Setup
 
 ### Installing `@rasterandstate/majestic-ui`
 
-The playground depends on `@rasterandstate/majestic-ui`. Use the config that matches where the package is published:
+The playground depends on `@rasterandstate/majestic-ui` (Svelte 5). Use the config that matches where the package is published:
 
 **GitHub Packages** (default):
 

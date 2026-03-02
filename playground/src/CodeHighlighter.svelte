@@ -15,14 +15,28 @@
   export let language: keyof typeof LANG = "typescript";
   export let noWrap = false;
 
-  import { CopyButton } from "@rasterandstate/majestic-ui";
   import Highlight from "svelte-highlight";
   import "svelte-highlight/styles/zenburn.css";
+
+  async function copyToClipboard() {
+    try {
+      await navigator.clipboard.writeText(code);
+    } catch (e) {
+      console.error("Copy failed:", e);
+    }
+  }
 </script>
 
 <div class="code-highlighter" class:noWrap>
   <div>
-    <CopyButton text={code} />
+    <button
+      type="button"
+      class="copy-button"
+      on:click={copyToClipboard}
+      title="Copy to clipboard"
+    >
+      Copy
+    </button>
   </div>
   <Highlight language={LANG[language]} {code} />
 </div>
@@ -39,15 +53,28 @@
     position: absolute;
     top: 0.5rem;
     right: 1.5rem;
+    z-index: 1;
+  }
+
+  .copy-button {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    background: var(--brand-charcoal);
+    border: 1px solid var(--brand-ash);
+    border-radius: 4px;
+    color: var(--brand-bone);
+    cursor: pointer;
+  }
+
+  .copy-button:hover {
+    background: var(--brand-ash);
+    color: var(--brand-warm-white);
   }
 
   :global(code.hljs) {
-    background: var(--cds-ui-01); /** TODO: use token */
-    font-family: var(--cds-code-02-font-family);
-    font-size: var(--cds-code-02-font-size);
-    font-weight: var(--cds-code-02-font-weight);
-    letter-spacing: var(--cds-code-02-letter-spacing);
-    line-height: var(--cds-code-02-line-height);
+    background: var(--brand-charcoal);
+    font-family: ui-monospace, monospace;
+    font-size: 0.875rem;
     cursor: text;
   }
 

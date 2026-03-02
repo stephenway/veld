@@ -2524,8 +2524,9 @@ export default class ComponentParser {
       /**
        * Parse once - compile() internally calls parse(), so we can extract the AST from it.
        * This avoids parsing the source twice for better performance.
+       * Svelte 5 requires an options object (accesses options.warningFilter before validation).
        */
-      compiled = compile(cleanedSource);
+      compiled = compile(cleanedSource, {});
     } catch (err) {
       const hasPropsRune = ComponentParser.PROPS_RUNE_REGEX.test(cleanedSource);
       if (hasPropsRune) {

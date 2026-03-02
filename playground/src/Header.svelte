@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { Content, Header, HeaderActionLink, HeaderUtilities, SkipToContent } from "@rasterandstate/majestic-ui";
   import pkg from "../../package.json";
   import LogoGithub20 from "./LogoGithub20.svelte";
 </script>
@@ -8,38 +7,69 @@
   <title>{pkg.name}</title>
 </svelte:head>
 
-<Header aria-label="Navigation" href="/">
-  <SkipToContent slot="skipToContent" />
-  <span slot="platform">
-    {pkg.name}
-    <code title="Version {pkg.version}">v{pkg.version}</code>
-  </span>
-  <HeaderUtilities>
-    <HeaderActionLink icon={LogoGithub20} href={pkg.homepage} target="_blank" />
-  </HeaderUtilities>
-</Header>
+<header class="playground-header" aria-label="Navigation">
+  <a href="/" class="playground-header__brand">
+    <span class="playground-header__platform">
+      {pkg.name}
+      <code title="Version {pkg.version}">v{pkg.version}</code>
+    </span>
+  </a>
+  <a
+    href={pkg.homepage}
+    target="_blank"
+    rel="noopener noreferrer"
+    class="playground-header__github"
+    aria-label="GitHub"
+  >
+    <LogoGithub20 />
+  </a>
+</header>
 
-<Content>
+<main class="playground-content">
   <slot />
-</Content>
+</main>
 
 <style>
-  :global(.bx--content) {
-    padding-top: 1rem;
-    background: none;
+  .playground-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: var(--header-height, 3.5rem);
+    padding: 0 1rem;
+    background: var(--brand-charcoal);
+    border-bottom: 1px solid var(--brand-ash);
   }
 
-  span {
+  .playground-header__brand {
+    color: var(--brand-warm-white);
+    text-decoration: none;
     display: flex;
     align-items: baseline;
   }
 
-  span code {
-    margin-left: var(--cds-spacing-02);
-    font-size: var(--cds-code-01-font-size);
-    font-weight: var(--cds-code-01-font-weight);
-    letter-spacing: var(--cds-code-01-letter-spacing);
-    line-height: var(--cds-code-01-line-height);
-    color: #c6c6c6;
+  .playground-header__brand:hover {
+    color: var(--brand-bone);
+  }
+
+  .playground-header__platform code {
+    margin-left: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: var(--brand-bone);
+  }
+
+  .playground-header__github {
+    color: var(--brand-warm-white);
+    padding: 0.25rem;
+  }
+
+  .playground-header__github:hover {
+    color: var(--brand-accent-light);
+  }
+
+  .playground-content {
+    padding: 1rem;
+    background: var(--brand-void);
+    min-height: calc(100vh - var(--header-height, 3.5rem));
   }
 </style>
