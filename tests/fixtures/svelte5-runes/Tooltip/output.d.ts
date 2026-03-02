@@ -3,11 +3,13 @@ import type { Snippet } from "svelte";
 
 export type Svelte5RunesTooltipProps = {
   /**
+   * The tooltip text to display
    * @default undefined
    */
   text: string;
 
   /**
+   * Child content that triggers the tooltip
    * @default undefined
    */
   children: Snippet;

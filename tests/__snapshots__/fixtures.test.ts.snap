@@ -410,6 +410,7 @@ exports[`fixtures (JSON) "svelte5-runes/Tooltip/input.svelte" 1`] = `
       "kind": "let",
       "constant": false,
       "type": "string",
+      "description": "The tooltip text to display",
       "isFunction": false,
       "isFunctionDeclaration": false,
       "isRequired": true,
@@ -420,6 +421,7 @@ exports[`fixtures (JSON) "svelte5-runes/Tooltip/input.svelte" 1`] = `
       "kind": "let",
       "constant": false,
       "type": "Snippet",
+      "description": "Child content that triggers the tooltip",
       "isFunction": false,
       "isFunctionDeclaration": false,
       "isRequired": true,
@@ -4587,11 +4589,13 @@ import type { Snippet } from "svelte";
 
 export type Svelte5RunesTooltipProps = {
   /**
+   * The tooltip text to display
    * @default undefined
    */
   text: string;
 
   /**
+   * Child content that triggers the tooltip
    * @default undefined
    */
   children: Snippet;

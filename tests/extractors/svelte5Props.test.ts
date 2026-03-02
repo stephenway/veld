@@ -107,6 +107,22 @@ let { text, children }: Props = $props();
     const props = extractSvelte5Props(script);
     expect(props).toHaveLength(0);
   });
+
+  test("extracts JSDoc descriptions from interface properties", () => {
+    const script = `
+interface Props {
+  /** The tooltip text to display */
+  text: string;
+  /** Child content that triggers the tooltip */
+  children: Snippet;
+}
+let { text, children }: Props = $props();
+`;
+    const props = extractSvelte5Props(script);
+    expect(props).toHaveLength(2);
+    expect(props[0]).toMatchObject({ name: "text", description: "The tooltip text to display" });
+    expect(props[1]).toMatchObject({ name: "children", description: "Child content that triggers the tooltip" });
+  });
 });
 
 describe("extractSvelte5PropsFromSource", () => {

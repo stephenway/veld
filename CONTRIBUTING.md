@@ -33,6 +33,28 @@ bun install
 
 Ensure the unit tests pass by running `bun test`.
 
+### Fixtures and goldens
+
+Fixtures live in `tests/fixtures/`. Each fixture has:
+
+- `input.svelte` – the component source
+- `output.json` – generated API (written by tests)
+- `output.d.ts` – generated TypeScript defs (written by tests)
+
+**Adding a fixture:**
+
+1. Create `tests/fixtures/<name>/input.svelte`
+2. Run `CI=false bun test tests/fixtures.test.ts --update-snapshots`
+3. Commit `input.svelte`, `output.json`, `output.d.ts`, and `tests/__snapshots__/fixtures.test.ts.snap`
+
+**Updating goldens (after extractor changes):**
+
+```sh
+CI=false bun test tests/fixtures.test.ts --update-snapshots
+```
+
+**Svelte 5 runes fixtures:** Use `tests/fixtures/svelte5-runes/<Name>/input.svelte`. Module names are derived from the path (e.g. `svelte5-runes/Tooltip` → `Svelte5RunesTooltip`).
+
 ### End-to-end (e2e) tests
 
 Because this library is written in TypeScript, it must be transpiled to JavaScript before it can be used by e2e tests in the `tests/e2e` folder.

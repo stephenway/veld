@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Ignores rest element (`...rest`)
   - Computed defaults (e.g. `id = crypto.randomUUID()`) represented as expression string
   - Auto-detects Svelte 5 syntax; no feature flag required
+  - JSDoc descriptions from interface/type property signatures
   - Existing Svelte 3/4 fixtures and outputs unchanged
 
 ## [0.26.2](https://github.com/carbon-design-system/sveld/releases/tag/v0.26.2) - 2026-02-16

@@ -139,12 +139,9 @@ function getPropertyInfoFromTypeLiteral(
 function getJSDocFromNode(node: ts.Node, sourceFile: ts.SourceFile): string | undefined {
   const fullText = sourceFile.getFullText();
   const start = node.getStart(sourceFile);
-  let searchStart = start - 1;
-  while (searchStart >= 0 && fullText[searchStart] !== "\n") {
-    searchStart--;
-  }
-  const beforeLine = fullText.slice(searchStart, start);
-  const blockMatch = beforeLine.match(JSDOC_BLOCK_REGEX);
+  const beforeNode = fullText.slice(0, start);
+  const matches = [...beforeNode.matchAll(new RegExp(JSDOC_BLOCK_REGEX.source, "g"))];
+  const blockMatch = matches.at(-1);
   if (!blockMatch) return undefined;
   const content = blockMatch[1]
     .replace(/^\s*\*\s?/gm, "")
