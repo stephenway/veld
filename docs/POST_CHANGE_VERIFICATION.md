@@ -160,6 +160,21 @@ All under `tests/fixtures/` (e.g. `typed-props`, `required`, `slots-named`, etc.
 
 ---
 
+## Build Artifact Correctness
+
+| Check | Status |
+| ----- | ------ |
+| `main` / `types` point to `./lib` | ✅ |
+| `cli.js` requires `./lib` (not `./src`) | ✅ |
+| `lib` gitignored; source of truth is `src` | ✅ |
+| `lib` structure matches `src` when built | ✅ (22 .ts → .js + .d.ts) |
+| Build runs automatically before publish | ✅ `prepare` script runs before `npm publish` |
+| Build runs on `npm install` (dev) | ✅ `prepare` runs after install |
+
+**Guarantee:** `prepare` ensures `lib` is always built before the package is packed for publish and after clone+install. No manual `bun run build` required before publish.
+
+---
+
 ## Follow-up Tasks
 
 - [x] Add CLI integration test that runs `sveld` and snapshot-compares output.
