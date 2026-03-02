@@ -1,5 +1,5 @@
 {
-  "name": "sveld",
+  "name": "veld",
   "version": "0.26.2",
   "license": "Apache-2.0",
   "engines": {
@@ -38,7 +38,7 @@
     "culls": "^0.1.2"
   },
   "bin": {
-    "sveld": "cli.js"
+    "veld": "cli.js"
   },
   "files": [
     "lib",
@@ -46,10 +46,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/carbon-design-system/sveld.git"
+    "url": "git+https://github.com/stephenway/veld.git"
   },
-  "homepage": "https://github.com/carbon-design-system/sveld",
-  "bugs": "https://github.com/carbon-design-system/sveld/issues",
+  "homepage": "https://github.com/stephenway/veld",
+  "bugs": "https://github.com/stephenway/veld/issues",
   "keywords": [
     "svelte",
     "svelte component",

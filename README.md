@@ -1,21 +1,21 @@
-# sveld
+# veld
 
 [![NPM][npm]][npm-url]
-![npm downloads to date](https://img.shields.io/npm/dt/sveld?color=262626&style=for-the-badge)
+![npm downloads to date](https://img.shields.io/npm/dt/veld?color=262626&style=for-the-badge)
 
-`sveld` is a TypeScript definition generator for Svelte components. It analyzes props, events, slots, and other component features through static analysis. Types and signatures can be defined using [JSDoc notation](https://jsdoc.app/). The tool can also generate component documentation in Markdown and JSON formats.
+`veld` is a TypeScript definition generator for Svelte components. It analyzes props, events, slots, and other component features through static analysis. Types and signatures can be defined using [JSDoc notation](https://jsdoc.app/). The tool can also generate component documentation in Markdown and JSON formats.
 
 The purpose of this project is to make third party Svelte component libraries compatible with the Svelte Language Server and TypeScript with minimal effort required by the author. For example, TypeScript definitions may be used during development via intelligent code completion in Integrated Development Environments (IDE) like VSCode.
 
 [Carbon Components Svelte](https://github.com/carbon-design-system/carbon-components-svelte) uses this library to auto-generate component types and API metadata.
 
-**Note:** `sveld` supports Svelte 3, 4, and 5. For Svelte 5 components using runes (`$props()`, `$state`, `$derived`), veld extracts prop documentation from `$props()` destructuring. Slots and events for Svelte 5 runes components are not yet extracted (requires Svelte 5 compiler). Traditional `export let` syntax continues to work for Svelte 3/4.
+**Note:** `veld` supports Svelte 3, 4, and 5. For Svelte 5 components using runes (`$props()`, `$state`, `$derived`), veld extracts prop documentation from `$props()` destructuring. Slots and events for Svelte 5 runes components are not yet extracted (requires Svelte 5 compiler). Traditional `export let` syntax continues to work for Svelte 3/4.
 
 **Node:** Node 18 is unsupported (EOL). Minimum supported Node is 22. We support the current and previous LTS (22 and 24).
 
 ---
 
-Given a Svelte component, `sveld` can infer basic prop types to generate TypeScript definitions compatible with the [Svelte Language Server](https://github.com/sveltejs/language-tools):
+Given a Svelte component, `veld` can infer basic prop types to generate TypeScript definitions compatible with the [Svelte Language Server](https://github.com/sveltejs/language-tools):
 
 **Button.svelte**
 
@@ -35,10 +35,10 @@ The generated definition extends the official `SvelteComponentTyped` interface e
 **Button.svelte.d.ts**
 
 ```ts
-import { SvelteComponentTyped } from "svelte";
-import type { SvelteHTMLElements } from "svelte/elements";
+import { SvelteComponentTyped } from 'svelte';
+import type { SvelteHTMLElements } from 'svelte/elements';
 
-type $RestProps = SvelteHTMLElements["button"];
+type $RestProps = SvelteHTMLElements['button'];
 
 type $Props = {
   /**
@@ -58,7 +58,7 @@ export type ButtonProps = Omit<$RestProps, keyof $Props> & $Props;
 
 export default class Button extends SvelteComponentTyped<
   ButtonProps,
-  { click: WindowEventMap["click"] },
+  { click: WindowEventMap['click'] },
   { default: Record<string, never> }
 > {}
 ```
@@ -69,7 +69,7 @@ Prop/event/slot types and signatures can be augmented using [JSDoc](https://jsdo
 
 ```js
 /** @type {"button" | "submit" | "reset"} */
-export let type = "button";
+export let type = 'button';
 
 /**
  * Set to `true` to use the primary variant
@@ -80,15 +80,15 @@ export let primary = false;
 The accompanying JSDoc annotations would generate the following:
 
 ```ts
-import type { SvelteHTMLElements } from "svelte/elements";
+import type { SvelteHTMLElements } from 'svelte/elements';
 
-type $RestProps = SvelteHTMLElements["button"];
+type $RestProps = SvelteHTMLElements['button'];
 
 type $Props = {
   /**
    * @default "button"
    */
-  type?: "button" | "submit" | "reset";
+  type?: 'button' | 'submit' | 'reset';
 
   /**
    * Set to `true` to use the primary variant
@@ -101,7 +101,7 @@ export type ButtonProps = Omit<$RestProps, keyof $Props> & $Props;
 
 export default class Button extends SvelteComponentTyped<
   ButtonProps,
-  { click: WindowEventMap["click"] },
+  { click: WindowEventMap['click'] },
   { default: Record<string, never> }
 > {}
 ```
@@ -110,29 +110,41 @@ export default class Button extends SvelteComponentTyped<
 
 ## Table of Contents
 
-- [Svelte 5 Runes Support](#svelte-5-runes-support)
-- [Approach](#approach)
-- [Usage](#usage)
-  - [Installation](#installation)
-  - [Vite](#vite)
-  - [Node.js](#nodejs)
-  - [CLI](#cli)
-  - [Publishing to NPM](#publishing-to-npm)
-- [Available Options](#available-options)
-- [API Reference](#api-reference)
-  - [@type](#type)
-  - [@typedef](#typedef)
-  - [@slot](#slot)
-    - [Svelte 5 Snippet Compatibility](#svelte-5-snippet-compatibility)
-  - [@event](#event)
-  - [Context API](#context-api)
-  - [@restProps](#restprops)
-  - [@extendProps](#extendprops)
-  - [@generics](#generics)
-  - [@component comments](#component-comments)
-  - [Accessor Props](#accessor-props)
-- [Contributing](#contributing)
-- [License](#license)
+- [veld](#veld)
+  - [Table of Contents](#table-of-contents)
+  - [Svelte 5 Runes Support](#svelte-5-runes-support)
+  - [Approach](#approach)
+  - [Usage](#usage)
+    - [Installation](#installation)
+    - [Vite](#vite)
+    - [CLI](#cli)
+    - [Node.js](#nodejs)
+      - [`jsonOptions.outDir`](#jsonoptionsoutdir)
+    - [Publishing to NPM](#publishing-to-npm)
+  - [Available Options](#available-options)
+    - [Plugin Options](#plugin-options)
+  - [API Reference](#api-reference)
+    - [`@type`](#type)
+    - [`@typedef`](#typedef)
+      - [Using `@property` for complex typedefs](#using-property-for-complex-typedefs)
+      - [Optional properties and default values](#optional-properties-and-default-values)
+    - [`@slot`](#slot)
+      - [Svelte 5 Snippet Compatibility](#svelte-5-snippet-compatibility)
+    - [`@event`](#event)
+      - [Using `@property` for complex event details](#using-property-for-complex-event-details)
+      - [Optional properties in event details](#optional-properties-in-event-details)
+    - [Context API](#context-api)
+      - [How it works](#how-it-works)
+      - [Example](#example)
+      - [Explicitly typing contexts](#explicitly-typing-contexts)
+      - [Notes](#notes)
+    - [`@restProps`](#restprops)
+    - [`@extendProps`](#extendprops)
+    - [`@generics`](#generics)
+    - [`@component` comments](#component-comments)
+    - [Accessor Props](#accessor-props)
+  - [Contributing](#contributing)
+  - [License](#license)
 
 ## Svelte 5 Runes Support
 
@@ -159,7 +171,7 @@ veld supports Svelte 5 components that use the `$props()` rune. When the Svelte 
 
 ## Approach
 
-`sveld` uses the Svelte compiler to statically analyze Svelte components exported from a library to generate documentation useful to the end user.
+`veld` uses the Svelte compiler to statically analyze Svelte components exported from a library to generate documentation useful to the end user.
 
 Extracted metadata include:
 
@@ -176,44 +188,44 @@ This library adopts a progressively enhanced approach. Any property type that ca
 
 ### Installation
 
-Install `sveld` as a development dependency.
+Install `veld` as a development dependency.
 
 ```sh
 # npm
-npm i -D sveld
+npm i -D veld
 
 # pnpm
-pnpm i -D sveld
+pnpm i -D veld
 
 # Bun
-bun i -D sveld
+bun i -D veld
 
 # Yarn
-yarn add -D sveld
+yarn add -D veld
 ```
 
 ### Vite
 
-Import and add `sveld` as a plugin to your `vite.config.ts`. The plugin only runs during `vite build` (not the dev server).
+Import and add `veld` as a plugin to your `vite.config.ts`. The plugin only runs during `vite build` (not the dev server).
 
 ```ts
 // vite.config.ts
-import { svelte } from "@sveltejs/vite-plugin-svelte";
-import sveld from "sveld";
-import { defineConfig } from "vite";
+import { svelte } from '@sveltejs/vite-plugin-svelte';
+import veld from 'veld';
+import { defineConfig } from 'vite';
 
 export default defineConfig({
-  plugins: [svelte(), sveld()],
+  plugins: [svelte(), veld()],
 });
 ```
 
-Since Vite uses Rollup for production builds, `sveld` also works in Rollup configurations.
+Since Vite uses Rollup for production builds, `veld` also works in Rollup configurations.
 
-By default, `sveld` will use the `"svelte"` field from your `package.json` to determine the entry point. You can override this by specifying an explicit `entry` option:
+By default, `veld` will use the `"svelte"` field from your `package.json` to determine the entry point. You can override this by specifying an explicit `entry` option:
 
 ```js
-sveld({
-  entry: "src/index.js",
+veld({
+  entry: 'src/index.js',
 });
 ```
 
@@ -224,7 +236,7 @@ Customize the output folder using the `typesOptions.outDir` option.
 The following example emits the output to the `dist` folder:
 
 ```diff
-sveld({
+veld({
 +  typesOptions: {
 +    outDir: 'dist'
 +  }
@@ -236,41 +248,41 @@ sveld({
 The CLI uses the `"svelte"` field from your `package.json` as the entry point:
 
 ```sh
-npx sveld
+npx veld
 ```
 
 Generate documentation in JSON and/or Markdown formats using the following flags:
 
 ```sh
-npx sveld --json --markdown
+npx veld --json --markdown
 ```
 
 ### Node.js
 
-You can also use `sveld` programmatically in Node.js.
+You can also use `veld` programmatically in Node.js.
 
-If no `input` is specified, `sveld` will infer the entry point based on the `package.json#svelte` field.
+If no `input` is specified, `veld` will infer the entry point based on the `package.json#svelte` field.
 
 ```js
-const { sveld } = require("sveld");
-const pkg = require("./package.json");
+const { veld } = require('veld');
+const pkg = require('./package.json');
 
-sveld({
-  input: "./src/index.js",
+veld({
+  input: './src/index.js',
   glob: true,
   markdown: true,
   markdownOptions: {
     onAppend: (type, document, components) => {
-      if (type === "h1")
+      if (type === 'h1')
         document.append(
-          "quote",
-          `${components.size} components exported from ${pkg.name}@${pkg.version}.`,
+          'quote',
+          `${components.size} components exported from ${pkg.name}@${pkg.version}.`
         );
     },
   },
   json: true,
   jsonOptions: {
-    outFile: "docs/src/COMPONENT_API.json",
+    outFile: 'docs/src/COMPONENT_API.json',
   },
 });
 ```
@@ -282,12 +294,12 @@ If `json` is `true`, a `COMPONENT_API.json` file will be generated at the root o
 Use the `jsonOptions.outDir` option to specify the folder for individual JSON files to be emitted.
 
 ```js
-sveld({
+veld({
   json: true,
   jsonOptions: {
     // an individual JSON file will be generated for each component API
     // e.g. "docs/Button.api.json"
-    outDir: "docs",
+    outDir: 'docs',
   },
 });
 ```
@@ -313,7 +325,7 @@ TypeScript definitions are outputted to the `types` folder by default. Don't for
 
 ### Plugin Options
 
-- **`entry`** (string, optional): Specify the entry point to uncompiled Svelte source. If not provided, sveld will use the `"svelte"` field from `package.json`.
+- **`entry`** (string, optional): Specify the entry point to uncompiled Svelte source. If not provided, veld will use the `"svelte"` field from `package.json`.
 - **`debug`** (boolean, optional): Include `extractionMode` and `warnings` in JSON output. When Rollup fails (e.g. Svelte 5 syntax), `warnings` contains structured entries like `{ code: "SVELTE5_COMPILE_FAILED", message, file }`.
 - **`glob`** (boolean, optional): Enable glob mode to analyze all `*.svelte` files.
 - **`types`** (boolean, optional, default: `true`): Generate TypeScript definitions.
@@ -328,7 +340,7 @@ By default, only TypeScript definitions are generated.
 To generate documentation in Markdown and JSON formats, set `markdown` and `json` to `true`.
 
 ```diff
-sveld({
+veld({
 +  markdown: true,
 +  json: true,
 })
@@ -338,14 +350,14 @@ sveld({
 
 ### `@type`
 
-Without a `@type` annotation, `sveld` will infer the primitive type for a prop:
+Without a `@type` annotation, `veld` will infer the primitive type for a prop:
 
 ```js
-export let kind = "primary";
+export let kind = 'primary';
 // inferred type: "string"
 ```
 
-For template literal default values, `sveld` infers the type as `string`:
+For template literal default values, `veld` infers the type as `string`:
 
 ```js
 export let id = `ccs-${Math.random().toString(36)}`;
@@ -370,7 +382,7 @@ Example:
  * Specify the kind of button
  * @type {"primary" | "secondary" | "tertiary"}
  */
-export let kind = "primary";
+export let kind = 'primary';
 
 /**
  * Specify the Carbon icon to render
@@ -432,7 +444,7 @@ Example:
  */
 
 /** @type {User} */
-export let user = { name: "John", email: "john@example.com", age: 30 };
+export let user = { name: 'John', email: 'john@example.com', age: 30 };
 ```
 
 Output:
@@ -483,7 +495,7 @@ Example:
  */
 
 /** @type {ComponentConfig} */
-export let config = { enabled: true, theme: "dark" };
+export let config = { enabled: true, theme: 'dark' };
 ```
 
 Output:
@@ -556,7 +568,7 @@ Example:
 
 #### Svelte 5 Snippet Compatibility
 
-For Svelte 5 compatibility, `sveld` automatically generates optional snippet props for all slots. This allows consumers to use either the traditional slot syntax or Svelte 5's `{#snippet}` syntax.
+For Svelte 5 compatibility, `veld` automatically generates optional snippet props for all slots. This allows consumers to use either the traditional slot syntax or Svelte 5's `{#snippet}` syntax.
 
 For slots with props (e.g., `let:prop`), the generated type uses a Snippet-compatible signature:
 
@@ -679,14 +691,14 @@ Example:
  * @event {null} key – Fired when `key` changes.
  */
 
-export let key = "";
+export let key = '';
 
-import { createEventDispatcher } from "svelte";
+import { createEventDispatcher } from 'svelte';
 
 const dispatch = createEventDispatcher();
 
-$: dispatch("button:key", { key });
-$: if (key) dispatch("key");
+$: dispatch('button:key', { key });
+$: if (key) dispatch('key');
 ```
 
 Output:
@@ -695,7 +707,7 @@ Output:
 export default class Component extends SvelteComponentTyped<
   ComponentProps,
   {
-    "button:key": CustomEvent<{ key: string }>;
+    'button:key': CustomEvent<{ key: string }>;
     /** Fired when `key` changes. */ key: CustomEvent<null>;
   },
   Record<string, never>
@@ -730,14 +742,14 @@ Example:
  * @property {boolean} newsletter - Whether the user opted into the newsletter
  */
 
-import { createEventDispatcher } from "svelte";
+import { createEventDispatcher } from 'svelte';
 
 const dispatch = createEventDispatcher();
 
 function handleSubmit() {
-  dispatch("submit", {
-    name: "Jane Doe",
-    email: "jane@example.com",
+  dispatch('submit', {
+    name: 'Jane Doe',
+    email: 'jane@example.com',
     newsletter: true,
   });
 }
@@ -781,12 +793,12 @@ Example:
  * @property {number} [density=0.9] - Optional density with default value
  */
 
-import { createEventDispatcher } from "svelte";
+import { createEventDispatcher } from 'svelte';
 
 const dispatch = createEventDispatcher();
 
 function throwSnowball() {
-  dispatch("snowball", {
+  dispatch('snowball', {
     isPacked: true,
     speed: 50,
   });
@@ -817,11 +829,11 @@ export default class Component extends SvelteComponentTyped<
 
 ### Context API
 
-`sveld` automatically generates TypeScript definitions for Svelte's `setContext`/`getContext` API by extracting types from JSDoc annotations on the context values.
+`veld` automatically generates TypeScript definitions for Svelte's `setContext`/`getContext` API by extracting types from JSDoc annotations on the context values.
 
 #### How it works
 
-When you use `setContext` in a component, `sveld` will:
+When you use `setContext` in a component, `veld` will:
 
 1. Detect the `setContext` call
 2. Extract the context key (must be a string literal)
@@ -958,7 +970,7 @@ There are several ways to provide type information for contexts:
 <script>
   import { setContext } from 'svelte';
 
-  // sveld infers basic function signatures
+  // veld infers basic function signatures
   setContext('modal', {
     open: (component, props) => {}, // Inferred as (arg, arg) => any
     close: () => {}                 // Inferred as () => any
@@ -986,7 +998,7 @@ There are several ways to provide type information for contexts:
 
 ### `@restProps`
 
-`sveld` can pick up inline HTML elements that `$$restProps` is forwarded to. However, it cannot infer the underlying element for instantiated components.
+`veld` can pick up inline HTML elements that `$$restProps` is forwarded to. However, it cannot infer the underlying element for instantiated components.
 
 You can use the `@restProps` tag to specify the element tags that `$$restProps` is forwarded to.
 
@@ -1040,7 +1052,7 @@ Example:
 
 export const secondary = true;
 
-import Button from "./Button.svelte";
+import Button from './Button.svelte';
 ```
 
 ### `@generics`
@@ -1054,7 +1066,7 @@ However, the `generics` attribute only works if using `lang="ts"`; the language 
 <script generics="Row extends DataTableRow = any"></script>
 ```
 
-Because `sveld` is designed to support JavaScript-only usage as a baseline, the API design to specify generics uses a custom JSDoc tag `@generics`.
+Because `veld` is designed to support JavaScript-only usage as a baseline, the API design to specify generics uses a custom JSDoc tag `@generics`.
 
 Signature:
 
@@ -1111,7 +1123,7 @@ export default class Component<Param1, Param2> extends SvelteComponentTyped<
 
 The Svelte Language Server supports component-level comments through the following syntax: `<!-- @component [comment] -->`.
 
-`sveld` will copy these over to the exported default component in the TypeScript definition.
+`veld` will copy these over to the exported default component in the TypeScript definition.
 
 Example:
 
@@ -1205,7 +1217,7 @@ Output:
 export type NotificationData = {
   /** Optional id for deduplication */
   id?: string;
-  kind?: "error" | "info" | "success";
+  kind?: 'error' | 'info' | 'success';
 };
 
 export type ComponentProps = Record<string, never>;
@@ -1242,5 +1254,5 @@ Refer to the [contributing guidelines](CONTRIBUTING.md).
 
 [Apache-2.0](LICENSE)
 
-[npm]: https://img.shields.io/npm/v/sveld.svg?color=262626&style=for-the-badge
-[npm-url]: https://npmjs.com/package/sveld
+[npm]: https://img.shields.io/npm/v/veld.svg?color=262626&style=for-the-badge
+[npm-url]: https://npmjs.com/package/veld

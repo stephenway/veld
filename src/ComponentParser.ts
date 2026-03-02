@@ -3274,7 +3274,7 @@ export default class ComponentParser {
     /**
      * Transform events for JSON serialization: convert element object to string for backward compatibility.
      * The internal representation uses element objects, but JSON output uses strings for compatibility
-     * with older versions of sveld and external tools.
+     * with older versions of veld and external tools.
      */
     const eventsArray = ComponentParser.mapToArray(this.events).map((event): SerializedComponentEvent => {
       if (event.type === "forwarded") {

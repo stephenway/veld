@@ -1,7 +1,7 @@
 /**
  * CLI integration tests.
  *
- * Runs the actual sveld CLI against test workdirs and compares output to goldens.
+ * Runs the actual veld CLI against test workdirs and compares output to goldens.
  * Uses deterministic paths and sorted output for stable snapshots.
  */
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";

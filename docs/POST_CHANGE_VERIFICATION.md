@@ -8,7 +8,7 @@
 
 ## Summary
 
-veld (fork of sveld) now supports Svelte 5 components that use the `$props()` rune. When the Svelte 4 compiler cannot parse a component (e.g. due to `$props()` or TypeScript syntax), veld falls back to TypeScript-based extraction of props. All existing Svelte 3/4 behavior remains unchanged.
+veld now supports Svelte 5 components that use the `$props()` rune. When the Svelte 4 compiler cannot parse a component (e.g. due to `$props()` or TypeScript syntax), veld falls back to TypeScript-based extraction of props. All existing Svelte 3/4 behavior remains unchanged.
 
 **Current health:** All 315 tests pass. Lint, format, build, and fixture type-check succeed.
 
@@ -33,7 +33,7 @@ veld (fork of sveld) now supports Svelte 5 components that use the `$props()` ru
 | Path                               | Purpose                                                   |
 | ---------------------------------- | --------------------------------------------------------- |
 | `index.ts`                         | Main export                                               |
-| `sveld.ts`                         | Programmatic API                                          |
+| `veld.ts`                          | Programmatic API                                          |
 | `cli.ts`                           | CLI implementation                                        |
 | `ComponentParser.ts`               | **Svelte file parsing**, AST walk, legacy prop extraction |
 | `extractors/svelte5Props.ts`       | **Svelte 5 extractor** (TypeScript AST)                   |
@@ -177,6 +177,6 @@ All under `tests/fixtures/` (e.g. `typed-props`, `required`, `slots-named`, etc.
 
 ## Follow-up Tasks
 
-- [x] Add CLI integration test that runs `sveld` and snapshot-compares output.
+- [x] Add CLI integration test that runs `veld` and snapshot-compares output.
 - [x] Consider Svelte 5 compiler as optional peer dep for full slots/events.
 - [x] Document `test/goldens` equivalent (fixtures + snapshots) in CONTRIBUTING.

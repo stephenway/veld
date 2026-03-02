@@ -2,10 +2,10 @@ import resolve from "@rollup/plugin-node-resolve";
 import { rollup } from "rollup";
 import svelte from "rollup-plugin-svelte";
 import { getSvelteEntry } from "./get-svelte-entry";
-import { generateBundle, type PluginSveldOptions, type SveldWarning, writeOutput } from "./plugin";
+import { generateBundle, type PluginVeldOptions, type VeldWarning, writeOutput } from "./plugin";
 
 /**
- * Command-line interface for sveld.
+ * Command-line interface for veld.
  *
  * Parses command-line arguments, runs Rollup to process the entry point,
  * generates component documentation, and writes output files.
@@ -14,12 +14,12 @@ import { generateBundle, type PluginSveldOptions, type SveldWarning, writeOutput
  *
  * @example
  * ```ts
- * // Called from CLI: sveld --types --json --glob
+ * // Called from CLI: veld --types --json --glob
  * // Parses: { types: true, json: true, glob: true }
  * ```
  */
 export async function cli(process: NodeJS.Process) {
-  const options: PluginSveldOptions = process.argv
+  const options: PluginVeldOptions = process.argv
     .slice(2)
     .map((arg) => {
       const [flag, value] = arg.split("=");
@@ -37,7 +37,7 @@ export async function cli(process: NodeJS.Process) {
     );
 
   const input = getSvelteEntry(options?.entry as string | undefined) || (options?.entry as string) || "src/index.js";
-  const warnings: SveldWarning[] = [];
+  const warnings: VeldWarning[] = [];
 
   try {
     const rollup_bundle = await rollup({

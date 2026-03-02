@@ -20,22 +20,22 @@ import writeTsDefinitions, { type WriteTsDefinitionsOptions } from "./writer/wri
 export const SCHEMA_VERSION = 1;
 
 /** Structured warning for debug output. */
-export interface SveldWarning {
+export interface VeldWarning {
   code: string;
   message: string;
   file?: string;
 }
 
-export interface PluginSveldOptions {
+export interface PluginVeldOptions {
   /**
    * Specify the entry point to uncompiled Svelte source.
-   * If not provided, sveld will use the "svelte" field from package.json.
+   * If not provided, veld will use the "svelte" field from package.json.
    */
   entry?: string;
   /** Include extractionMode and warnings in JSON output. */
   debug?: boolean;
   /** Warnings collected during run (e.g. Rollup compile failure). Only included in JSON when debug. */
-  warnings?: SveldWarning[];
+  warnings?: VeldWarning[];
   glob?: boolean;
   types?: boolean;
   typesOptions?: Partial<Omit<WriteTsDefinitionsOptions, "inputDir">>;
@@ -57,7 +57,7 @@ export type ComponentDocs = Map<ComponentModuleName, ComponentDocApi>;
 const STYLE_TAG_REGEX = /<style.+?<\/style>/gims;
 const HYPHEN_REGEX = /-/g;
 
-interface SveldPlugin {
+interface VeldPlugin {
   name: string;
   apply?: "build" | "serve";
   enforce?: "pre" | "post";
@@ -66,12 +66,12 @@ interface SveldPlugin {
   writeBundle(): void | Promise<void>;
 }
 
-export default function pluginSveld(opts?: PluginSveldOptions): SveldPlugin {
+export default function pluginVeld(opts?: PluginVeldOptions): VeldPlugin {
   let result: GenerateBundleResult;
   let input: string | null;
 
   return {
-    name: "vite-plugin-sveld",
+    name: "vite-plugin-veld",
     apply: "build",
     enforce: "post",
     buildStart() {
@@ -310,7 +310,7 @@ export async function generateBundle(input: string, glob: boolean) {
  * // Generates: types/*.d.ts, COMPONENT_API.json, COMPONENT_INDEX.md
  * ```
  */
-export async function writeOutput(result: GenerateBundleResult, opts: PluginSveldOptions, input: string) {
+export async function writeOutput(result: GenerateBundleResult, opts: PluginVeldOptions, input: string) {
   const inputDir = dirname(input);
 
   const writePromises: Promise<unknown>[] = [];

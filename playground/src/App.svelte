@@ -98,7 +98,7 @@
         />
       </Column>
       <Column xlg={9} lg={10} sm={8}>
-        <FormLabel id="output">Sveld output</FormLabel>
+        <FormLabel id="output">Veld output</FormLabel>
         <Tabs type="container" id="output">
           <Tab label="TypeScript" />
           <Tab label="JSON" />

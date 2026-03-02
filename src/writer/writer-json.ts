@@ -1,6 +1,6 @@
 import path from "node:path";
 import { normalizeSeparators } from "../path";
-import type { ComponentDocApi, ComponentDocs, SveldWarning } from "../plugin";
+import type { ComponentDocApi, ComponentDocs, VeldWarning } from "../plugin";
 import { SCHEMA_VERSION } from "../plugin";
 import { createJsonWriter } from "./Writer";
 
@@ -12,7 +12,7 @@ export interface WriteJsonOptions {
   /** Include extractionMode and warnings in output. */
   debug?: boolean;
   /** Warnings to include when debug is true. */
-  warnings?: SveldWarning[];
+  warnings?: VeldWarning[];
 }
 
 /**
@@ -27,7 +27,7 @@ interface JsonOutput {
   components: ComponentDocApi[];
   /** Schema version for downstream parsers. Only when --debug. */
   schemaVersion?: number;
-  warnings?: SveldWarning[];
+  warnings?: VeldWarning[];
 }
 
 /**

@@ -2,7 +2,7 @@
 
 ## Overview
 
-veld (fork of sveld) generates TypeScript definitions and documentation for Svelte components. It supports Svelte 3/4 (legacy `export let` syntax) and Svelte 5 (runes: `$props()`, `$state`, `$derived`, Snippet).
+veld generates TypeScript definitions and documentation for Svelte components. It supports Svelte 3/4 (legacy `export let` syntax) and Svelte 5 (runes: `$props()`, `$state`, `$derived`, Snippet).
 
 ## Parsing Pipeline
 

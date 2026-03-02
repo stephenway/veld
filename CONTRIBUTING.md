@@ -11,13 +11,13 @@ Fork the repository and clone your fork:
 
 ```sh
 git clone <YOUR_FORK>
-cd sveld
+cd veld
 ```
 
 Set the original repository as the upstream:
 
 ```sh
-git remote add upstream git@github.com:IBM/sveld.git
+git remote add upstream git@github.com:IBM/veld.git
 # verify that the upstream is added
 git remote -v
 ```
@@ -64,7 +64,7 @@ bun run update-goldens
 
 ### CLI integration tests
 
-CLI integration tests run the actual `sveld` CLI against test workdirs and compare output to snapshots. Workdirs:
+CLI integration tests run the actual `veld` CLI against test workdirs and compare output to snapshots. Workdirs:
 
 - `tests/cli/workdir-svelte5/` – Svelte 5 runes components
 - `tests/cli/workdir-legacy/` – Svelte 3/4 components
