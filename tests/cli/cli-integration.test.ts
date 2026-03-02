@@ -112,13 +112,14 @@ describe("CLI integration", () => {
     }
   });
 
-  test("JSON includes extractionMode with --debug", async () => {
+  test("JSON includes extractionMode and schemaVersion with --debug", async () => {
     const workdirSrc = join(PROJECT_ROOT, "tests/cli/workdir-svelte5");
     copyWorkdir(workdirSrc, tempDir);
 
     runCli(tempDir, ["--json", "--glob", "--entry=./src/index.js", "--debug"]);
 
     const json = JSON.parse(readFileSync(join(tempDir, "COMPONENT_API.json"), "utf-8"));
+    expect(json.schemaVersion).toBe(1);
     expect(json.components.length).toBeGreaterThan(0);
     for (const c of json.components) {
       expect(c).toHaveProperty("extractionMode");

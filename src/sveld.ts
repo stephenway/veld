@@ -35,5 +35,5 @@ export async function sveld(opts?: SveldOptions) {
   const input = getSvelteEntry(opts?.input);
   if (input === null) return;
   const result = await generateBundle(input, opts?.glob === true);
-  writeOutput(result, opts || {}, input);
+  await writeOutput(result, opts || {}, input);
 }

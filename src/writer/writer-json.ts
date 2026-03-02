@@ -1,6 +1,7 @@
 import path from "node:path";
 import { normalizeSeparators } from "../path";
 import type { ComponentDocApi, ComponentDocs, SveldWarning } from "../plugin";
+import { SCHEMA_VERSION } from "../plugin";
 import { createJsonWriter } from "./Writer";
 
 export interface WriteJsonOptions {
@@ -18,11 +19,14 @@ export interface WriteJsonOptions {
  * JSON output structure for component documentation.
  *
  * Contains the total count of components and an array of all
- * component documentation objects. When debug is true, may include warnings.
+ * component documentation objects. When debug is true, may include
+ * schemaVersion, extractionMode, and warnings.
  */
 interface JsonOutput {
   total: number;
   components: ComponentDocApi[];
+  /** Schema version for downstream parsers. Only when --debug. */
+  schemaVersion?: number;
   warnings?: SveldWarning[];
 }
 
@@ -113,8 +117,11 @@ async function writeJsonLocal(components: ComponentDocs, options: WriteJsonOptio
     total: components.size,
     components: transformAndSortComponents(components, options.inputDir, options.debug),
   };
-  if (options.debug && options.warnings?.length) {
-    output.warnings = options.warnings;
+  if (options.debug) {
+    output.schemaVersion = SCHEMA_VERSION;
+    if (options.warnings?.length) {
+      output.warnings = options.warnings;
+    }
   }
 
   const output_path = path.join(process.cwd(), options.outFile);

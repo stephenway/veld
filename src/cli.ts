@@ -57,5 +57,5 @@ export async function cli(process: NodeJS.Process) {
 
   const result = await generateBundle(input, options?.glob === true);
 
-  writeOutput(result, { ...options, debug: options?.debug === true, warnings }, input);
+  await writeOutput(result, { ...options, debug: options?.debug === true, warnings }, input);
 }

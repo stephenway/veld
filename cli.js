@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 
-(() => {
+(async () => {
   try {
-    require("./lib").cli(process);
+    await require("./lib").cli(process);
   } catch (error) {
     console.error(error);
+    process.exit(1);
   }
 })();

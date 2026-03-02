@@ -68,6 +68,21 @@ veld (fork of sveld) generates TypeScript definitions and documentation for Svel
 2. **Prop extractor**: `extractSvelte5Props()` is a pure function; can be unit-tested in isolation.
 3. **Integration**: `ComponentParser.parseSvelteComponent()` catches compile errors and invokes Svelte 5 extractor when appropriate.
 
+## Svelte 5 Fallback: Props-Only Extraction (Structural Limitation)
+
+The extraction pipeline is: **Svelte 4 compiler → fail → TypeScript AST fallback**. Because we rely on the Svelte 4 compiler first, we cannot extract slots, events, or contexts when it fails (Svelte 5 runes syntax). The fallback uses `ts.createSourceFile()` on the script content only—it has no access to the template AST.
+
+| Extracted | Legacy (Svelte 3/4) | Svelte 5 Fallback |
+|-----------|---------------------|-------------------|
+| Props     | ✅                  | ✅                |
+| Slots     | ✅                  | ❌                |
+| Events    | ✅                  | ❌                |
+| Contexts  | ✅                  | ❌                |
+
+This is a structural limitation, not a bug. Slots, events, and contexts require the Svelte compiler’s template AST. The TypeScript fallback only sees `<script>` content.
+
+**Long-term**: As Svelte 4 becomes irrelevant, the Svelte 5 compiler will become the dominant path. Until then, Svelte 5 runes components will only have props documented. Use `--debug` to see `extractionMode: "svelte5-fallback"` in JSON output.
+
 ## Risks
 
 1. **Svelte version**: veld uses Svelte 4 compiler. Svelte 5 components fail to compile; we rely on TypeScript-only parsing for props. Slots/events for Svelte 5 are not extracted until Svelte 5 compiler is used.

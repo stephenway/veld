@@ -154,8 +154,8 @@ veld supports Svelte 5 components that use the `$props()` rune. When the Svelte 
 **Limitations (Svelte 5 fallback path):**
 
 - No cross-file type resolution. The `Props` interface must be defined in the same script.
-- **Slots and events are not extracted.** The fallback uses TypeScript-based extraction of `$props()` only. Slots, forwarded events, and dispatched events require the Svelte 5 compiler and are omitted in the fallback path.
-- Only props are documented. Use `--debug` with the CLI to see `extractionMode: "svelte5-fallback"` in JSON output when the fallback path is used.
+- **Props-only extraction.** The pipeline is Svelte 4 compiler → fail → TypeScript AST fallback. Because the fallback parses only `<script>` content (no template AST), it cannot extract slots, forwarded events, dispatched events, or contexts. These require the Svelte 5 compiler. This is a structural limitation; when Svelte 5 compiler is adopted, the full extraction path will be available.
+- Use `--debug` with the CLI to see `extractionMode: "svelte5-fallback"` in JSON output when the fallback path is used.
 
 ## Approach
 
