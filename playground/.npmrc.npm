@@ -1,0 +1,3 @@
+# Use when @rasterandstate/majestic-ui is published to public npm
+# cp .npmrc.npm .npmrc && bun install
+@rasterandstate:registry=https://registry.npmjs.org

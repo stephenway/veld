@@ -143,6 +143,7 @@ export default class Button extends SvelteComponentTyped<
     - [`@generics`](#generics)
     - [`@component` comments](#component-comments)
     - [Accessor Props](#accessor-props)
+  - [Versioning Policy](#versioning-policy)
   - [Contributing](#contributing)
   - [License](#license)
 
@@ -1245,6 +1246,18 @@ export default class Component extends SvelteComponentTyped<
 ```
 
 When only `@param` tags are present without `@returns`, the return type defaults to `any`. When only `@returns` is present without `@param`, the function signature is `() => returnType`.
+
+## Versioning Policy
+
+veld follows semantic versioning.
+
+PATCH releases contain bug fixes only.
+
+MINOR releases may add new fields but will not remove or change existing ones.
+
+MAJOR releases may include breaking schema or CLI changes.
+
+Consumers should use schemaVersion when available.
 
 ## Contributing
 

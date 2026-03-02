@@ -2,6 +2,7 @@
   "type": "module",
   "private": true,
   "scripts": {
+    "setup": "bun install",
     "dev": "bun --bun vite",
     "build": "bun --bun vite build",
     "preview": "bun --bun vite preview"
