@@ -79,7 +79,7 @@
             id: datum.moduleName,
             text: datum.name,
           }))}
-          on:select={(e) => {
+          on:select={(e: CustomEvent<{ selectedId: string }>) => {
             selectedId = e.detail.selectedId;
 
             tick().then(() => {
