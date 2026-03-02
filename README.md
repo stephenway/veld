@@ -1,5 +1,7 @@
 # veld
 
+Fork of [sveld](https://github.com/carbon-design-system/sveld) by IBM/Carbon Design System.
+
 [![NPM][npm]][npm-url]
 ![npm downloads to date](https://img.shields.io/npm/dt/veld?color=262626&style=for-the-badge)
 
