@@ -2,7 +2,8 @@
 
 ## Prerequisites
 
-[Bun](https://bun.sh/docs/installation).
+- [Bun](https://bun.sh/docs/installation)
+- **Node 22+** (Node 18 is EOL and unsupported; we support Node 22 and 24 LTS)
 
 ## Set-up
 
@@ -92,11 +93,11 @@ This project uses GitHub Actions for continuous integration (CI).
 
 The CI matrix runs on:
 
-- **Node:** 18, 20, 22 (LTS)
+- **Node:** 22, 24 (current and previous LTS; Node 18 is EOL)
 - **OS:** ubuntu-latest, windows-latest, macos-15
 - **Bun:** Pinned via `.bun-version`
 
-Jobs build the library, run unit tests, lint, and type-check fixtures. The deploy step runs only on `main` (macos + node 20).
+Jobs build the library, run unit tests, lint, and type-check fixtures. The deploy step runs only on `main` (macos + node 22).
 
 ### Version bump and publish
 

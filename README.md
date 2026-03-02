@@ -11,6 +11,8 @@ The purpose of this project is to make third party Svelte component libraries co
 
 **Note:** `sveld` supports Svelte 3, 4, and 5. For Svelte 5 components using runes (`$props()`, `$state`, `$derived`), veld extracts prop documentation from `$props()` destructuring. Slots and events for Svelte 5 runes components are not yet extracted (requires Svelte 5 compiler). Traditional `export let` syntax continues to work for Svelte 3/4.
 
+**Node:** Node 18 is unsupported (EOL). Minimum supported Node is 22. We support the current and previous LTS (22 and 24).
+
 ---
 
 Given a Svelte component, `sveld` can infer basic prop types to generate TypeScript definitions compatible with the [Svelte Language Server](https://github.com/sveltejs/language-tools):
