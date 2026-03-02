@@ -60,7 +60,7 @@ function transformAndSortComponents(
       return rest as ComponentDocApi;
     }
     return base;
-  }).sort((a, b) => a.moduleName.localeCompare(b.moduleName));
+  }).sort((a, b) => a.moduleName.localeCompare(b.moduleName, "en"));
 }
 
 /**
@@ -88,7 +88,7 @@ async function writeJsonComponents(components: ComponentDocs, options: WriteJson
     output.map((c) => {
       const outFile = path.resolve(path.join(options.outDir || "", `${c.moduleName}.api.json`));
       const writer = createJsonWriter();
-      console.log(`created ${outFile}"\n`);
+      console.log(`created ${outFile}\n`);
       return writer.write(outFile, JSON.stringify(c));
     }),
   );

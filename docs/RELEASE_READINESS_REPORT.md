@@ -164,7 +164,7 @@ Tarball contents: 48 files
 
 | Location | Usage | Risk |
 |----------|-------|------|
-| `writer-json.ts:63` | `localeCompare(b.moduleName)` | No locale — can vary by system locale |
+| `writer-json.ts:63` | `localeCompare(b.moduleName, "en")` | Fixed — deterministic |
 | `writer/markdown-render-utils.ts:35` | `Array.from(keys).sort()` | String keys — stable |
 | `writer/markdown-render-utils.ts:89` | `sort((a) => ...)` | Comparator ignores `b` — groups by reactive/constant; relative order within groups may vary |
 | `ComponentParser.ts:3228` | `?.elements.sort()` | String elements — stable |
@@ -182,6 +182,8 @@ Tarball contents: 48 files
 - `path.normalize()` and `path.join()` used for `filePath` in JSON
 - `writer-json.ts:56` — `path.join(inputDir, path.normalize(component.filePath))` can produce absolute paths when `inputDir` is absolute
 - CLI integration tests use `normalizePaths()` to replace workdir with `<workdir>` for stable snapshots
+
+**Future-proofing:** Absolute paths in JSON output are fine for humans but annoying for machines. If anyone uses JSON output for CI diffs (e.g. comparing API snapshots), absolute paths create churn across different checkout directories or CI runners. Not a blocker, but a classic tooling-friction source. Consider emitting relative paths when possible.
 
 ### Environment sensitivity
 
@@ -205,18 +207,17 @@ Tarball contents: 48 files
 
 ### CI workflow (`.github/workflows/ci.yml`)
 
-- **Node matrix:** 18, 20, 22, 24 (via include)
+- **Node matrix:** 22, 24 (matches engines)
 - **OS:** ubuntu-latest, windows-latest, macos-15
 - **Steps:** Lint (biome), build, test, typecheck fixtures
 - **No:** `npm pack` validation step
 
-### CI vs engines mismatch
+### CI vs engines alignment
 
 - **engines.node:** `>=22 <26`
-- **README / CONTRIBUTING:** Node 18 unsupported; Node 22 and 24 supported
-- **CI:** Runs on Node 18 and 20 — tests unsupported versions
+- **CI:** Runs on Node 22 and 24 — matches supported versions
 
-**Verdict:** Test coverage is strong. Svelte 5 runes, CLI, and `--debug` are exercised. CI runs on Node 18/20 despite engines; this is a configuration mismatch, not a test gap.
+**Verdict:** Test coverage is strong. Svelte 5 runes, CLI, and `--debug` are exercised. CI matrix aligns with engines.
 
 ---
 
@@ -247,31 +248,22 @@ Tarball contents: 48 files
 
 ### A) Verdict
 
-**Ship with warnings**
+**Ship**
 
 ### B) Blockers
 
-None. No hard blockers identified.
+None.
 
-### C) Non-blocking follow-ups (ranked)
+### C) Non-blocking follow-ups (good hygiene)
 
-1. **CI / engines alignment**  
-   `.github/workflows/ci.yml` runs Node 18 and 20; `package.json` engines require `>=22 <26`. Align CI matrix with supported versions (e.g. 22, 24) to avoid testing unsupported environments.
+1. **Prettier pinning**  
+   `prettier: "^3.8.0"` — pin to avoid "why did my generated output change with no source changes?" support tickets. Cheap insurance.
 
-2. **Console.log typo in writer-json**  
-   `src/writer/writer-json.ts:91` — `console.log(\`created ${outFile}"\n\`)` has an extra `"` before `\n`, producing output like `created /path/file.api.json"\n`. Fix: remove the stray `"`.
+2. **Absolute paths in JSON**  
+   `writer-json.ts` can emit absolute `filePath` when `inputDir` is absolute. Fine for humans, annoying for CI diffs. Consider relative paths when possible.
 
-3. **localeCompare locale**  
-   `src/writer/writer-json.ts:63` — `a.moduleName.localeCompare(b.moduleName)` uses default locale. Use `localeCompare(b.moduleName, "en")` for stable ordering across environments.
+3. **Docs gaps**  
+   Add `--debug` to CLI flags section; fix CONTRIBUTING upstream URL mismatch. Low effort, reduces confusion.
 
-4. **Prettier version**  
-   `prettier: "^3.8.0"` — consider pinning (e.g. `3.8.0`) to avoid formatting changes from minor updates.
-
-5. **CONTRIBUTING upstream URL**  
-   CONTRIBUTING references `IBM/sveld.git`; package.json uses `carbon-design-system/sveld`. Update CONTRIBUTING to match the canonical repo.
-
-6. **CLI flags documentation**  
-   Add `--debug` to the CLI usage section in README for discoverability.
-
-7. **CI pack check**  
-   Add an `npm pack` (or `npm pack --dry-run`) step to CI to validate the published artifact before release.
+4. **CI pack check**  
+   Add `npm pack --dry-run` to CI. Best kind of guardrail: catches "oops I didn't build" before users do.

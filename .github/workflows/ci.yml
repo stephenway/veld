@@ -10,17 +10,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: [18, 20, 22]
+        node: [22, 24]
         os: [ubuntu-latest, windows-latest, macos-15]
-        include:
-          - node: 22
-            os: ubuntu-latest
-          - node: 24
-            os: ubuntu-latest
-          - node: 22
-            os: windows-latest
-          - node: 22
-            os: macos-15
 
     runs-on: ${{ matrix.os }}
 
