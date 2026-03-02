@@ -1,6 +1,8 @@
 import path from "node:path";
 import { Glob } from "bun";
 import ComponentParser from "../src/ComponentParser";
+
+const PATH_SEPARATOR_REGEX = /[-/]/;
 import Writer from "../src/writer/Writer";
 import { writeTsDefinition } from "../src/writer/writer-ts-definitions";
 
@@ -22,7 +24,7 @@ const getMetadata = (fixture: { filePath: string; source: string }) => {
   const { filePath, source } = fixture;
   const { dir } = path.parse(filePath);
   const moduleName = dir
-    .split("-")
+    .split(PATH_SEPARATOR_REGEX)
     .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
     .join("");
   const metadata = { moduleName, filePath };

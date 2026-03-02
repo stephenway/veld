@@ -1,0 +1,42 @@
+{
+  "props": [
+    {
+      "name": "longPropName",
+      "kind": "let",
+      "constant": false,
+      "type": "string",
+      "value": "\"x\"",
+      "isFunction": false,
+      "isFunctionDeclaration": false,
+      "isRequired": false,
+      "reactive": false
+    },
+    {
+      "name": "a",
+      "kind": "let",
+      "constant": false,
+      "type": "number",
+      "isFunction": false,
+      "isFunctionDeclaration": false,
+      "isRequired": true,
+      "reactive": false
+    },
+    {
+      "name": "id",
+      "kind": "let",
+      "constant": false,
+      "type": "string",
+      "value": "crypto.randomUUID()",
+      "isFunction": false,
+      "isFunctionDeclaration": false,
+      "isRequired": false,
+      "reactive": false
+    }
+  ],
+  "moduleExports": [],
+  "slots": [],
+  "events": [],
+  "typedefs": [],
+  "generics": null,
+  "contexts": []
+}

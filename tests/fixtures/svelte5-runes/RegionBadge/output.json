@@ -1,0 +1,32 @@
+{
+  "props": [
+    {
+      "name": "format",
+      "kind": "let",
+      "constant": false,
+      "type": "\"dvd\" | \"bluray\" | \"4k\"",
+      "value": "\"bluray\"",
+      "isFunction": false,
+      "isFunctionDeclaration": false,
+      "isRequired": false,
+      "reactive": false
+    },
+    {
+      "name": "regionCode",
+      "kind": "let",
+      "constant": false,
+      "type": "string | null",
+      "value": "null",
+      "isFunction": false,
+      "isFunctionDeclaration": false,
+      "isRequired": false,
+      "reactive": false
+    }
+  ],
+  "moduleExports": [],
+  "slots": [],
+  "events": [],
+  "typedefs": [],
+  "generics": null,
+  "contexts": []
+}

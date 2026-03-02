@@ -20,6 +20,7 @@ import type {
 import type { Node } from "estree-walker";
 import { compile, parse, walk } from "svelte/compiler";
 import type { Ast, TemplateNode, Var } from "svelte/types/compiler/interfaces";
+import { extractSvelte5PropsFromSource } from "./extractors/svelte5Props";
 import { getElementByTag } from "./element-tag-map";
 
 /**
@@ -2432,6 +2433,8 @@ export default class ComponentParser {
    */
   private static readonly TS_DIRECTIVE_REGEX = /\/\/\s*@ts-[^\n\r]*/g;
 
+  private static readonly PROPS_RUNE_REGEX = /\$props\s*\(/;
+
   /**
    * Strips TypeScript directive comments from script blocks only.
    *
@@ -2514,11 +2517,53 @@ export default class ComponentParser {
     const cleanedSource = ComponentParser.stripTypeScriptDirectivesFromScripts(source);
     this.source = cleanedSource;
 
-    /**
-     * Parse once - compile() internally calls parse(), so we can extract the AST from it.
-     * This avoids parsing the source twice for better performance.
-     */
-    const compiled = compile(cleanedSource);
+    let compiled: CompiledSvelteCode;
+    try {
+      /**
+       * Parse once - compile() internally calls parse(), so we can extract the AST from it.
+       * This avoids parsing the source twice for better performance.
+       */
+      compiled = compile(cleanedSource);
+    } catch (err) {
+      const hasPropsRune = ComponentParser.PROPS_RUNE_REGEX.test(cleanedSource);
+      if (hasPropsRune) {
+        const svelte5Props = extractSvelte5PropsFromSource(cleanedSource);
+        if (svelte5Props && svelte5Props.length > 0) {
+          if (this.options?.verbose) {
+            console.log("[parsing] Detected Svelte 5 rune props pattern, using fallback extraction");
+          }
+          for (const p of svelte5Props) {
+            this.addProp(p.name, {
+              name: p.name,
+              kind: p.kind,
+              constant: p.constant,
+              type: p.type,
+              value: p.value,
+              description: p.description,
+              isFunction: p.isFunction,
+              isFunctionDeclaration: p.isFunctionDeclaration,
+              isRequired: p.isRequired,
+              reactive: p.reactive,
+            });
+          }
+          const processedProps = ComponentParser.mapToArray(this.props);
+          return {
+            props: processedProps,
+            moduleExports: [],
+            slots: [],
+            events: [],
+            typedefs: [],
+            generics: null,
+            rest_props: undefined,
+            extends: undefined,
+            componentComment: undefined,
+            contexts: [],
+          };
+        }
+      }
+      throw err;
+    }
+
     this.compiled = compiled;
 
     /**

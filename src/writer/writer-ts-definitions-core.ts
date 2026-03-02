@@ -800,9 +800,12 @@ export function writeTsDefinition(component: ComponentDocApi) {
   const needsHTMLAttributes =
     rest_props?.type === "Element" && rest_props.name === "svelte:element" && !rest_props.thisValue;
 
+  const needsSnippet = props?.some((p) => p.type?.includes("Snippet")) ?? false;
+
   return `
   import { SvelteComponentTyped } from "svelte";${
-    needsSvelteHTMLElements ? `import type { SvelteHTMLElements } from "svelte/elements";\n` : ""
+    needsSnippet ? `import type { Snippet } from "svelte";\n` : ""
+  }${needsSvelteHTMLElements ? `import type { SvelteHTMLElements } from "svelte/elements";\n` : ""
   }${needsHTMLAttributes ? `import type { HTMLAttributes } from "svelte/elements";\n` : ""}
   ${genImports({ extends: _extends })}
   ${genModuleExports({ moduleExports })}

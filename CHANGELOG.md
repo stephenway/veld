@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+**Added**
+
+- Svelte 5 runes support: extract prop documentation from `$props()` destructuring
+  - Supports `let { foo = 123 }: Props = $props()` with interface or inline type
+  - Supports `Snippet` typed children
+  - Ignores `$derived` / `$derived.by` / `$state` (not documented as props)
+  - Handles destructuring renames (`{ long: short }` → doc name is `long`)
+  - Ignores rest element (`...rest`)
+  - Computed defaults (e.g. `id = crypto.randomUUID()`) represented as expression string
+  - Auto-detects Svelte 5 syntax; no feature flag required
+  - Existing Svelte 3/4 fixtures and outputs unchanged
+
 ## [0.26.2](https://github.com/carbon-design-system/sveld/releases/tag/v0.26.2) - 2026-02-16
 
 **Fixes**

@@ -9,7 +9,7 @@ The purpose of this project is to make third party Svelte component libraries co
 
 [Carbon Components Svelte](https://github.com/carbon-design-system/carbon-components-svelte) uses this library to auto-generate component types and API metadata.
 
-**Note:** `sveld` supports Svelte 3, 4, and 5, but does not support Svelte 5-specific syntax or runes-only usage. Components must use traditional Svelte syntax (e.g., `export let` for props, not `$props()`).
+**Note:** `sveld` supports Svelte 3, 4, and 5. For Svelte 5 components using runes (`$props()`, `$state`, `$derived`), veld extracts prop documentation from `$props()` destructuring. Slots and events for Svelte 5 runes components are not yet extracted (requires Svelte 5 compiler). Traditional `export let` syntax continues to work for Svelte 3/4.
 
 ---
 
@@ -108,6 +108,7 @@ export default class Button extends SvelteComponentTyped<
 
 ## Table of Contents
 
+- [Svelte 5 Runes Support](#svelte-5-runes-support)
 - [Approach](#approach)
 - [Usage](#usage)
   - [Installation](#installation)
@@ -130,6 +131,28 @@ export default class Button extends SvelteComponentTyped<
   - [Accessor Props](#accessor-props)
 - [Contributing](#contributing)
 - [License](#license)
+
+## Svelte 5 Runes Support
+
+veld supports Svelte 5 components that use the `$props()` rune. When the Svelte 4 compiler cannot parse a component (e.g. due to `$props()` or TypeScript syntax), veld falls back to TypeScript-based extraction of props.
+
+**Supported patterns:**
+
+- `let { foo = 123 }: Props = $props();` — interface or type reference
+- `let { bar }: { bar?: string } = $props();` — inline type literal
+- `children: Snippet` — Snippet-typed children from interface
+- `let { longPropName: short = 'x' } = $props();` — destructuring renames (doc name is `longPropName`)
+- `let { id = crypto.randomUUID() } = $props();` — computed defaults (stored as expression string)
+
+**Ignored (not documented as props):**
+
+- `$derived` / `$derived.by` / `$state` values
+- Rest element: `let { a, ...rest } = $props();` — `rest` is not a prop
+
+**Limitations:**
+
+- No cross-file type resolution. The `Props` interface must be defined in the same script.
+- Slots and events for Svelte 5 runes components are not yet extracted (requires Svelte 5 compiler). Only props are documented.
 
 ## Approach
 

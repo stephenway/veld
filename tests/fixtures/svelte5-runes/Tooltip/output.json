@@ -1,0 +1,30 @@
+{
+  "props": [
+    {
+      "name": "text",
+      "kind": "let",
+      "constant": false,
+      "type": "string",
+      "isFunction": false,
+      "isFunctionDeclaration": false,
+      "isRequired": true,
+      "reactive": false
+    },
+    {
+      "name": "children",
+      "kind": "let",
+      "constant": false,
+      "type": "Snippet",
+      "isFunction": false,
+      "isFunctionDeclaration": false,
+      "isRequired": true,
+      "reactive": false
+    }
+  ],
+  "moduleExports": [],
+  "slots": [],
+  "events": [],
+  "typedefs": [],
+  "generics": null,
+  "contexts": []
+}

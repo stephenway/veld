@@ -7,7 +7,8 @@
       "!!**/lib/**/*",
       "!!**/dist/**/*",
       "!!**/.svelte-kit/**/*",
-      "!!**/tests/e2e/**/*"
+      "!!**/tests/e2e/**/*",
+      "!!**/tests/fixtures/**/output.d.ts"
     ]
   },
   "formatter": {
@@ -128,6 +129,16 @@
       "includes": ["**/tests/fixtures/**/*.json"],
       "formatter": {
         "enabled": false
+      }
+    },
+    {
+      "includes": ["**/extractors/svelte5Props.ts"],
+      "linter": {
+        "rules": {
+          "performance": {
+            "noNamespaceImport": "off"
+          }
+        }
       }
     }
   ]
