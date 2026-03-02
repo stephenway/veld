@@ -1,4 +1,4 @@
-import "carbon-components-svelte/css/all.css";
+import "@rasterandstate/majestic-ui/css/all.css";
 import App from "./App.svelte";
 
 new App({ target: document.body });

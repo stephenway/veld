@@ -15,7 +15,7 @@
   export let language: keyof typeof LANG = "typescript";
   export let noWrap = false;
 
-  import { CopyButton } from "carbon-components-svelte";
+  import { CopyButton } from "@rasterandstate/majestic-ui";
   import Highlight from "svelte-highlight";
   import "svelte-highlight/styles/zenburn.css";
 </script>

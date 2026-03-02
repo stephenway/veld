@@ -7,7 +7,7 @@
 
 The purpose of this project is to make third party Svelte component libraries compatible with the Svelte Language Server and TypeScript with minimal effort required by the author. For example, TypeScript definitions may be used during development via intelligent code completion in Integrated Development Environments (IDE) like VSCode.
 
-[Carbon Components Svelte](https://github.com/carbon-design-system/carbon-components-svelte) uses this library to auto-generate component types and API metadata.
+[Majestic UI](https://github.com/rasterandstate/majestic-ui) uses this library to auto-generate component types and API metadata.
 
 **Note:** `veld` supports Svelte 3, 4, and 5. For Svelte 5 components using runes (`$props()`, `$state`, `$derived`), veld extracts prop documentation from `$props()` destructuring. Slots and events for Svelte 5 runes components are not yet extracted (requires Svelte 5 compiler). Traditional `export let` syntax continues to work for Svelte 3/4.
 

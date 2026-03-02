@@ -450,7 +450,7 @@ type RestProps = undefined | ComponentInlineElement | ComponentElement;
 interface Extends {
   /** The interface name to extend (e.g., "ButtonProps") */
   interface: string;
-  /** The import path for the interface (e.g., "./types" or "carbon-components-svelte") */
+  /** The import path for the interface (e.g., "./types" or "@rasterandstate/majestic-ui") */
   import: string;
 }
 

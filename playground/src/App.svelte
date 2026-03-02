@@ -9,7 +9,7 @@
     Tab,
     TabContent,
     Tabs,
-  } from "carbon-components-svelte";
+  } from "@rasterandstate/majestic-ui";
   import { onMount, type SvelteComponent, tick } from "svelte";
   import ComponentParser from "../../src/ComponentParser";
   import CodeEditor from "./CodeEditor.svelte";

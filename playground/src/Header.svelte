@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Content, Header, HeaderActionLink, HeaderUtilities, SkipToContent } from "carbon-components-svelte";
+  import { Content, Header, HeaderActionLink, HeaderUtilities, SkipToContent } from "@rasterandstate/majestic-ui";
   import pkg from "../../package.json";
   import LogoGithub20 from "./LogoGithub20.svelte";
 </script>
