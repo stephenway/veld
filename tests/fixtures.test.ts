@@ -3,6 +3,7 @@ import { Glob } from "bun";
 import ComponentParser from "../src/ComponentParser";
 
 const PATH_SEPARATOR_REGEX = /[-/]/;
+
 import Writer from "../src/writer/Writer";
 import { writeTsDefinition } from "../src/writer/writer-ts-definitions";
 

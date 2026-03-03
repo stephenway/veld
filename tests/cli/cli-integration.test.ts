@@ -4,11 +4,11 @@
  * Runs the actual veld CLI against test workdirs and compares output to goldens.
  * Uses deterministic paths and sorted output for stable snapshots.
  */
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
-import { copyFileSync, mkdirSync, readdirSync } from "node:fs";
+
+import { spawnSync } from "node:child_process";
+import { copyFileSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { spawnSync } from "node:child_process";
 
 const PROJECT_ROOT = join(import.meta.dir, "../..");
 const CLI_PATH = join(PROJECT_ROOT, "cli.js");

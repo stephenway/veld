@@ -18,7 +18,7 @@
   import Highlight from "svelte-highlight";
   import "svelte-highlight/styles/zenburn.css";
 
-  async function copyToClipboard() {
+  async function _copyToClipboard() {
     try {
       await navigator.clipboard.writeText(code);
     } catch (e) {

@@ -26,6 +26,7 @@ export interface Svelte5PropDoc {
 
 const PROPS_CALL_REGEX = /\$props\s*\(/;
 const JSDOC_BLOCK_REGEX = /\/\*\*([\s\S]*?)\*\//;
+const NON_WHITESPACE_REGEX = /[^\s]/;
 
 /**
  * Extracts the instance script content from a .svelte file.
@@ -156,7 +157,10 @@ function getJSDocFromNode(node: ts.Node, sourceFile: ts.SourceFile): string | un
     const jsDoc = (node as ts.Node & { jsDoc?: ts.JSDoc[] }).jsDoc;
     if (jsDoc?.length) {
       const last = jsDoc[jsDoc.length - 1];
-      const content = last.getText(sourceFile).replace(/^\/\*\*|\*\/$/g, "").trim();
+      const content = last
+        .getText(sourceFile)
+        .replace(/^\/\*\*|\*\/$/g, "")
+        .trim();
       return formatJSDocContent(content) || undefined;
     }
 
@@ -171,7 +175,7 @@ function getJSDocFromNode(node: ts.Node, sourceFile: ts.SourceFile): string | un
       if (!blockMatch) return undefined;
       const jsDocEndInSlice = (blockMatch.index ?? 0) + blockMatch[0].length;
       const between = beforeNode.slice(jsDocEndInSlice);
-      if (/[^\s]/.test(between)) return undefined;
+      if (NON_WHITESPACE_REGEX.test(between)) return undefined;
       const content = formatJSDocContent(blockMatch[1]);
       return content || undefined;
     }

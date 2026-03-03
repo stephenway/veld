@@ -6,8 +6,7 @@ export default defineConfig({
     svelte({
       preprocess: vitePreprocess(),
       // svelte-highlight uses Svelte 4 syntax ($$restProps)
-      dynamicCompileOptions: ({ filename }) =>
-        filename.includes("svelte-highlight") ? { runes: false } : {},
+      dynamicCompileOptions: ({ filename }) => (filename.includes("svelte-highlight") ? { runes: false } : {}),
     }),
   ],
   optimizeDeps: {

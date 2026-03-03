@@ -4,7 +4,6 @@ import type {
   ArrowFunctionExpression,
   BinaryExpression,
   CallExpression,
-  ExportDefaultDeclaration,
   ExportNamedDeclaration,
   Expression,
   FunctionExpression,
@@ -12,6 +11,7 @@ import type {
   Literal,
   MemberExpression,
   NewExpression,
+  Node,
   ObjectExpression,
   Property,
   TemplateLiteral,
@@ -19,12 +19,11 @@ import type {
   VariableDeclaration,
   VariableDeclarator,
 } from "estree";
-import type { Node } from "estree";
 import { walk } from "estree-walker";
 import { compile, parse } from "svelte/compiler";
 import type { Ast, TemplateNode, Var } from "svelte/types/compiler/interfaces";
-import { extractSvelte5PropsFromSource } from "./extractors/svelte5Props";
 import { getElementByTag } from "./element-tag-map";
+import { extractSvelte5PropsFromSource } from "./extractors/svelte5Props";
 
 /**
  * Regular expression for matching variable declarations.
