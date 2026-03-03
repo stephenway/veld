@@ -45,11 +45,7 @@ interface JsonOutput {
  * // Output: components with normalized absolute paths, sorted by name
  * ```
  */
-function transformAndSortComponents(
-  components: ComponentDocs,
-  inputDir: string,
-  debug?: boolean,
-): ComponentDocApi[] {
+function transformAndSortComponents(components: ComponentDocs, inputDir: string, debug?: boolean): ComponentDocApi[] {
   return Array.from(components, ([_moduleName, component]) => {
     const base = {
       ...component,

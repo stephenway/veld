@@ -54,7 +54,7 @@
 
   let activeTab: "ts" | "json" | "md" = "ts";
 
-  function handleSelect(e: Event) {
+  function _handleSelect(e: Event) {
     const target = e.target as HTMLSelectElement;
     selectedId = target.value;
     tick().then(() => {
@@ -91,6 +91,7 @@
       <label for="output-tabs" class="playground-label">Veld output</label>
       <div class="playground-tabs" role="tablist" id="output-tabs">
         <button
+          type="button"
           class="playground-tab"
           class:active={activeTab === "ts"}
           role="tab"
@@ -100,6 +101,7 @@
           TypeScript
         </button>
         <button
+          type="button"
           class="playground-tab"
           class:active={activeTab === "json"}
           role="tab"
@@ -109,6 +111,7 @@
           JSON
         </button>
         <button
+          type="button"
           class="playground-tab"
           class:active={activeTab === "md"}
           role="tab"
