@@ -12,12 +12,30 @@ import writeJson, { type WriteJsonOptions } from "./writer/writer-json";
 import writeMarkdown, { type WriteMarkdownOptions } from "./writer/writer-markdown";
 import writeTsDefinitions, { type WriteTsDefinitionsOptions } from "./writer/writer-ts-definitions";
 
-export interface PluginSveldOptions {
+/**
+ * JSON output schema version. Bump when the structure of ComponentDocApi or
+ * JsonOutput changes in a breaking way. Emitted under --debug for downstream
+ * parsers to detect compatibility.
+ */
+export const SCHEMA_VERSION = 1;
+
+/** Structured warning for debug output. */
+export interface VeldWarning {
+  code: string;
+  message: string;
+  file?: string;
+}
+
+export interface PluginVeldOptions {
   /**
    * Specify the entry point to uncompiled Svelte source.
-   * If not provided, sveld will use the "svelte" field from package.json.
+   * If not provided, veld will use the "svelte" field from package.json.
    */
   entry?: string;
+  /** Include extractionMode and warnings in JSON output. */
+  debug?: boolean;
+  /** Warnings collected during run (e.g. Rollup compile failure). Only included in JSON when debug. */
+  warnings?: VeldWarning[];
   glob?: boolean;
   types?: boolean;
   typesOptions?: Partial<Omit<WriteTsDefinitionsOptions, "inputDir">>;
@@ -39,21 +57,21 @@ export type ComponentDocs = Map<ComponentModuleName, ComponentDocApi>;
 const STYLE_TAG_REGEX = /<style.+?<\/style>/gims;
 const HYPHEN_REGEX = /-/g;
 
-interface SveldPlugin {
+interface VeldPlugin {
   name: string;
   apply?: "build" | "serve";
   enforce?: "pre" | "post";
   buildStart(): void;
   generateBundle(): Promise<void>;
-  writeBundle(): void;
+  writeBundle(): void | Promise<void>;
 }
 
-export default function pluginSveld(opts?: PluginSveldOptions): SveldPlugin {
+export default function pluginVeld(opts?: PluginVeldOptions): VeldPlugin {
   let result: GenerateBundleResult;
   let input: string | null;
 
   return {
-    name: "vite-plugin-sveld",
+    name: "vite-plugin-veld",
     apply: "build",
     enforce: "post",
     buildStart() {
@@ -64,8 +82,8 @@ export default function pluginSveld(opts?: PluginSveldOptions): SveldPlugin {
         result = await generateBundle(input, opts?.glob === true);
       }
     },
-    writeBundle() {
-      if (input != null) writeOutput(result, opts || {}, input);
+    async writeBundle() {
+      if (input != null) await writeOutput(result, opts || {}, input);
     },
   };
 }
@@ -113,7 +131,8 @@ export async function generateBundle(input: string, glob: boolean) {
   const allComponents: ParsedExports = { ...exports };
 
   if (glob) {
-    for (const file of globSync([`${dir}/**/*.svelte`])) {
+    const globFiles = globSync([`${dir}/**/*.svelte`]).sort();
+    for (const file of globFiles) {
       const moduleName = parse(file).name.replace(HYPHEN_REGEX, "");
       const source = normalizeSeparators(`./${relative(dir, file)}`);
 
@@ -291,8 +310,10 @@ export async function generateBundle(input: string, glob: boolean) {
  * // Generates: types/*.d.ts, COMPONENT_API.json, COMPONENT_INDEX.md
  * ```
  */
-export function writeOutput(result: GenerateBundleResult, opts: PluginSveldOptions, input: string) {
+export async function writeOutput(result: GenerateBundleResult, opts: PluginVeldOptions, input: string) {
   const inputDir = dirname(input);
+
+  const writePromises: Promise<unknown>[] = [];
 
   if (opts?.types !== false) {
     /**
@@ -300,13 +321,15 @@ export function writeOutput(result: GenerateBundleResult, opts: PluginSveldOptio
      * This ensures TypeScript definitions are available for all components,
      * not just exported ones, which is useful for type checking.
      */
-    writeTsDefinitions(result.allComponentsForTypes, {
-      outDir: "types",
-      preamble: "",
-      ...opts?.typesOptions,
-      exports: result.exports,
-      inputDir,
-    });
+    writePromises.push(
+      writeTsDefinitions(result.allComponentsForTypes, {
+        outDir: "types",
+        preamble: "",
+        ...opts?.typesOptions,
+        exports: result.exports,
+        inputDir,
+      }),
+    );
   }
 
   if (opts?.json) {
@@ -315,12 +338,16 @@ export function writeOutput(result: GenerateBundleResult, opts: PluginSveldOptio
      * JSON output should only include components that are actually exported,
      * matching the public API surface.
      */
-    writeJson(result.components, {
-      outFile: "COMPONENT_API.json",
-      ...opts?.jsonOptions,
-      input,
-      inputDir,
-    });
+    writePromises.push(
+      writeJson(result.components, {
+        outFile: "COMPONENT_API.json",
+        ...opts?.jsonOptions,
+        input,
+        inputDir,
+        debug: opts?.debug,
+        warnings: opts?.warnings,
+      }),
+    );
   }
 
   if (opts?.markdown) {
@@ -329,9 +356,13 @@ export function writeOutput(result: GenerateBundleResult, opts: PluginSveldOptio
      * Documentation should only include exported components that are
      * part of the public API.
      */
-    writeMarkdown(result.components, {
-      outFile: "COMPONENT_INDEX.md",
-      ...opts?.markdownOptions,
-    });
+    writePromises.push(
+      writeMarkdown(result.components, {
+        outFile: "COMPONENT_INDEX.md",
+        ...opts?.markdownOptions,
+      }),
+    );
   }
+
+  await Promise.all(writePromises);
 }

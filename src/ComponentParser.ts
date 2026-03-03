@@ -4,6 +4,8 @@ import type {
   ArrowFunctionExpression,
   BinaryExpression,
   CallExpression,
+  ExportDefaultDeclaration,
+  ExportNamedDeclaration,
   Expression,
   FunctionExpression,
   Identifier,
@@ -17,9 +19,11 @@ import type {
   VariableDeclaration,
   VariableDeclarator,
 } from "estree";
-import type { Node } from "estree-walker";
-import { compile, parse, walk } from "svelte/compiler";
+import type { Node } from "estree";
+import { walk } from "estree-walker";
+import { compile, parse } from "svelte/compiler";
 import type { Ast, TemplateNode, Var } from "svelte/types/compiler/interfaces";
+import { extractSvelte5PropsFromSource } from "./extractors/svelte5Props";
 import { getElementByTag } from "./element-tag-map";
 
 /**
@@ -449,7 +453,7 @@ type RestProps = undefined | ComponentInlineElement | ComponentElement;
 interface Extends {
   /** The interface name to extend (e.g., "ButtonProps") */
   interface: string;
-  /** The import path for the interface (e.g., "./types" or "carbon-components-svelte") */
+  /** The import path for the interface (e.g., "./types" or "@rasterandstate/majestic-ui") */
   import: string;
 }
 
@@ -536,6 +540,8 @@ export interface ParsedComponent {
   componentComment?: string;
   /** Contexts created with `setContext` in the component */
   contexts?: ComponentContext[];
+  /** Extraction path used: legacy (Svelte 4 compiler) or svelte5-fallback (runes). Omitted unless --debug. */
+  extractionMode?: "legacy" | "svelte5-fallback";
 }
 
 export default class ComponentParser {
@@ -1074,7 +1080,7 @@ export default class ComponentParser {
    * indicating they can change and trigger reactivity in Svelte.
    */
   private collectReactiveVars() {
-    const reactiveVars = this.compiled?.vars.filter(({ reassigned, writable }) => reassigned && writable) ?? [];
+    const reactiveVars = (this.compiled?.vars ?? []).filter(({ reassigned, writable }) => reassigned && writable);
     for (const { name } of reactiveVars) {
       this.reactive_vars.add(name);
     }
@@ -2432,6 +2438,8 @@ export default class ComponentParser {
    */
   private static readonly TS_DIRECTIVE_REGEX = /\/\/\s*@ts-[^\n\r]*/g;
 
+  private static readonly PROPS_RUNE_REGEX = /\$props\s*\(/;
+
   /**
    * Strips TypeScript directive comments from script blocks only.
    *
@@ -2514,11 +2522,55 @@ export default class ComponentParser {
     const cleanedSource = ComponentParser.stripTypeScriptDirectivesFromScripts(source);
     this.source = cleanedSource;
 
-    /**
-     * Parse once - compile() internally calls parse(), so we can extract the AST from it.
-     * This avoids parsing the source twice for better performance.
-     */
-    const compiled = compile(cleanedSource);
+    let compiled: CompiledSvelteCode;
+    try {
+      /**
+       * Parse once - compile() internally calls parse(), so we can extract the AST from it.
+       * This avoids parsing the source twice for better performance.
+       * Svelte 5 requires an options object (accesses options.warningFilter before validation).
+       */
+      compiled = compile(cleanedSource, {});
+    } catch (err) {
+      const hasPropsRune = ComponentParser.PROPS_RUNE_REGEX.test(cleanedSource);
+      if (hasPropsRune) {
+        const svelte5Props = extractSvelte5PropsFromSource(cleanedSource);
+        if (svelte5Props && svelte5Props.length > 0) {
+          if (this.options?.verbose) {
+            console.log("[parsing] Detected Svelte 5 rune props pattern, using fallback extraction");
+          }
+          for (const p of svelte5Props) {
+            this.addProp(p.name, {
+              name: p.name,
+              kind: p.kind,
+              constant: p.constant,
+              type: p.type,
+              value: p.value,
+              description: p.description,
+              isFunction: p.isFunction,
+              isFunctionDeclaration: p.isFunctionDeclaration,
+              isRequired: p.isRequired,
+              reactive: p.reactive,
+            });
+          }
+          const processedProps = ComponentParser.mapToArray(this.props);
+          return {
+            props: processedProps,
+            moduleExports: [],
+            slots: [],
+            events: [],
+            typedefs: [],
+            generics: null,
+            rest_props: undefined,
+            extends: undefined,
+            componentComment: undefined,
+            contexts: [],
+            extractionMode: "svelte5-fallback",
+          };
+        }
+      }
+      throw err;
+    }
+
     this.compiled = compiled;
 
     /**
@@ -2536,12 +2588,14 @@ export default class ComponentParser {
     if (this.parsed?.module) {
       walk(this.parsed?.module as unknown as Node, {
         enter: (node) => {
-          if (node.type === "ExportNamedDeclaration") {
+          const n = node as Node;
+          if (n.type === "ExportNamedDeclaration") {
+            const exp = n as ExportNamedDeclaration;
             /**
              * Skip re-exports (e.g., export { A, B } from 'library').
              * These don't have declarations in the current file, so we can't extract metadata.
              */
-            if (node.declaration == null) {
+            if (exp.declaration == null) {
               return;
             }
 
@@ -2549,7 +2603,7 @@ export default class ComponentParser {
              * Handle both VariableDeclaration and FunctionDeclaration exports.
              * Both can be exported from the module script and need type extraction.
              */
-            if (!node.declaration || typeof node.declaration !== "object" || !("type" in node.declaration)) {
+            if (!exp.declaration || typeof exp.declaration !== "object" || !("type" in exp.declaration)) {
               return;
             }
 
@@ -2563,8 +2617,8 @@ export default class ComponentParser {
             let params: ComponentPropParam[] | undefined;
             let returnType: string | undefined;
 
-            if (node.declaration.type === "FunctionDeclaration") {
-              const funcDecl = node.declaration as { id?: { name?: string } };
+            if (exp.declaration.type === "FunctionDeclaration") {
+              const funcDecl = exp.declaration as { id?: { name?: string } };
               if (!funcDecl.id || !funcDecl.id.name) return;
               prop_name = funcDecl.id.name;
               kind = "function";
@@ -2572,8 +2626,8 @@ export default class ComponentParser {
               type = "() => any";
               isFunction = true;
               isFunctionDeclaration = true;
-            } else if (node.declaration.type === "VariableDeclaration") {
-              const varDecl = node.declaration as VariableDeclaration;
+            } else if (exp.declaration.type === "VariableDeclaration") {
+              const varDecl = exp.declaration as VariableDeclaration;
               const firstDeclarator = varDecl.declarations[0];
               if (!firstDeclarator || typeof firstDeclarator !== "object" || !("id" in firstDeclarator)) {
                 return;
@@ -2598,8 +2652,8 @@ export default class ComponentParser {
               return;
             }
 
-            if (node.leadingComments) {
-              const jsdocInfo = this.processJSDocComment(node.leadingComments);
+            if (exp.leadingComments) {
+              const jsdocInfo = this.processJSDocComment(exp.leadingComments);
               if (jsdocInfo) {
                 if (jsdocInfo.type) type = jsdocInfo.type;
                 params = jsdocInfo.params;
@@ -2671,7 +2725,7 @@ export default class ComponentParser {
           }
 
           if (calleeName === "setContext") {
-            this.parseSetContextCall(node, parent ?? undefined);
+            this.parseSetContextCall(node as Node, (parent as Node) ?? undefined);
           }
 
           if (calleeName) {
@@ -2746,10 +2800,11 @@ export default class ComponentParser {
         }
 
         if (node.type === "ExportNamedDeclaration") {
+          const exp = node as ExportNamedDeclaration;
           /**
            * Handle export {} - empty export statement, nothing to extract.
            */
-          if (node.declaration == null && node.specifiers.length === 0) {
+          if (exp.declaration == null && (exp.specifiers?.length ?? 0) === 0) {
             return;
           }
 
@@ -2758,8 +2813,8 @@ export default class ComponentParser {
            * We need to find the original declaration and use the exported name as the prop name.
            */
           let prop_name: string;
-          if (node.declaration == null && node.specifiers[0]?.type === "ExportSpecifier") {
-            const specifier = node.specifiers[0];
+          if (exp.declaration == null && exp.specifiers?.[0]?.type === "ExportSpecifier") {
+            const specifier = exp.specifiers[0];
             const localName =
               specifier.local && typeof specifier.local === "object" && "name" in specifier.local
                 ? (specifier.local as Identifier).name
@@ -2790,7 +2845,7 @@ export default class ComponentParser {
                 break;
               }
             }
-            node.declaration = declaration;
+            (exp as { declaration?: VariableDeclaration }).declaration = declaration;
             prop_name = exportedName;
           }
 
@@ -2798,7 +2853,7 @@ export default class ComponentParser {
            * Skip re-exports (e.g., export { A, B } from 'library').
            * These don't have declarations in the current file.
            */
-          if (node.declaration == null) {
+          if (exp.declaration == null) {
             return;
           }
 
@@ -2806,7 +2861,7 @@ export default class ComponentParser {
            * Handle both VariableDeclaration and FunctionDeclaration.
            * Both can be exported as props from the component.
            */
-          if (!node.declaration || typeof node.declaration !== "object" || !("type" in node.declaration)) {
+          if (!exp.declaration || typeof exp.declaration !== "object" || !("type" in exp.declaration)) {
             return;
           }
 
@@ -2820,8 +2875,8 @@ export default class ComponentParser {
           let returnType: string | undefined;
           let isRequired = false;
 
-          if (node.declaration.type === "FunctionDeclaration") {
-            const funcDecl = node.declaration as { id?: { name?: string } };
+          if (exp.declaration.type === "FunctionDeclaration") {
+            const funcDecl = exp.declaration as { id?: { name?: string } };
             if (!funcDecl.id || !funcDecl.id.name) return;
             prop_name ??= funcDecl.id.name;
             kind = "function";
@@ -2830,8 +2885,8 @@ export default class ComponentParser {
             isFunction = true;
             isFunctionDeclaration = true;
             isRequired = false;
-          } else if (node.declaration.type === "VariableDeclaration") {
-            const varDecl = node.declaration as VariableDeclaration;
+          } else if (exp.declaration.type === "VariableDeclaration") {
+            const varDecl = exp.declaration as VariableDeclaration;
             const firstDeclarator = varDecl.declarations[0];
             if (!firstDeclarator || typeof firstDeclarator !== "object" || !("id" in firstDeclarator)) {
               return;
@@ -2858,8 +2913,8 @@ export default class ComponentParser {
             return;
           }
 
-          if (node.leadingComments) {
-            const jsdocInfo = this.processJSDocComment(node.leadingComments);
+          if (exp.leadingComments) {
+            const jsdocInfo = this.processJSDocComment(exp.leadingComments);
             if (jsdocInfo) {
               if (jsdocInfo.type) type = jsdocInfo.type;
               params = jsdocInfo.params;
@@ -3226,7 +3281,7 @@ export default class ComponentParser {
     /**
      * Transform events for JSON serialization: convert element object to string for backward compatibility.
      * The internal representation uses element objects, but JSON output uses strings for compatibility
-     * with older versions of sveld and external tools.
+     * with older versions of veld and external tools.
      */
     const eventsArray = ComponentParser.mapToArray(this.events).map((event): SerializedComponentEvent => {
       if (event.type === "forwarded") {
@@ -3251,6 +3306,7 @@ export default class ComponentParser {
       extends: this.extends,
       componentComment: this.componentComment,
       contexts: contextsArray,
+      extractionMode: "legacy",
     };
   }
 }

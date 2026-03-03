@@ -1,5 +1,5 @@
 <script lang="ts">
-  export let parsed_component = {};
+  export let parsed_component: Record<string, unknown> = {};
   export let moduleName = "";
 
   import pluginEstree from "prettier/plugins/estree";
@@ -9,12 +9,40 @@
   import CodeHighlighter from "./CodeHighlighter.svelte";
   import TabContentOverlay from "./TabContentOverlay.svelte";
 
-  let prettier_error = null;
+  let prettier_error: unknown = null;
 
-  $: code = writeTsDefinition({
+  const EMPTY_DOC = {
+    props: [],
+    moduleExports: [],
+    slots: [],
+    events: [],
+    typedefs: [],
+    generics: null,
+    rest_props: undefined,
+    filePath: "VIRTUAL",
+    moduleName: "",
+  };
+
+  $: normalized = {
+    ...EMPTY_DOC,
     ...parsed_component,
+    props: (parsed_component.props as unknown[]) ?? [],
+    moduleExports: (parsed_component.moduleExports as unknown[]) ?? [],
+    slots: (parsed_component.slots as unknown[]) ?? [],
+    events: (parsed_component.events as unknown[]) ?? [],
+    typedefs: (parsed_component.typedefs as unknown[]) ?? [],
     moduleName,
-  });
+    filePath: (parsed_component.filePath as string) ?? "VIRTUAL",
+  };
+
+  $: code = (() => {
+    try {
+      return writeTsDefinition(normalized);
+    } catch (e) {
+      prettier_error = e;
+      return `// Error: ${e instanceof Error ? e.message : String(e)}`;
+    }
+  })();
   $: {
     prettier_error = null;
     format(code, {

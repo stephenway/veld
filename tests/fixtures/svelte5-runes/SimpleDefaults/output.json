@@ -1,0 +1,32 @@
+{
+  "props": [
+    {
+      "name": "size",
+      "kind": "let",
+      "constant": false,
+      "type": "\"sm\" | \"md\"",
+      "value": "\"md\"",
+      "isFunction": false,
+      "isFunctionDeclaration": false,
+      "isRequired": false,
+      "reactive": false
+    },
+    {
+      "name": "count",
+      "kind": "let",
+      "constant": false,
+      "type": "number",
+      "value": "0",
+      "isFunction": false,
+      "isFunctionDeclaration": false,
+      "isRequired": false,
+      "reactive": false
+    }
+  ],
+  "moduleExports": [],
+  "slots": [],
+  "events": [],
+  "typedefs": [],
+  "generics": null,
+  "contexts": []
+}

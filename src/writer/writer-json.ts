@@ -1,6 +1,7 @@
 import path from "node:path";
 import { normalizeSeparators } from "../path";
-import type { ComponentDocApi, ComponentDocs } from "../plugin";
+import type { ComponentDocApi, ComponentDocs, VeldWarning } from "../plugin";
+import { SCHEMA_VERSION } from "../plugin";
 import { createJsonWriter } from "./Writer";
 
 export interface WriteJsonOptions {
@@ -8,17 +9,25 @@ export interface WriteJsonOptions {
   inputDir: string;
   outFile: string;
   outDir?: string;
+  /** Include extractionMode and warnings in output. */
+  debug?: boolean;
+  /** Warnings to include when debug is true. */
+  warnings?: VeldWarning[];
 }
 
 /**
  * JSON output structure for component documentation.
  *
  * Contains the total count of components and an array of all
- * component documentation objects.
+ * component documentation objects. When debug is true, may include
+ * schemaVersion, extractionMode, and warnings.
  */
 interface JsonOutput {
   total: number;
   components: ComponentDocApi[];
+  /** Schema version for downstream parsers. Only when --debug. */
+  schemaVersion?: number;
+  warnings?: VeldWarning[];
 }
 
 /**
@@ -36,11 +45,22 @@ interface JsonOutput {
  * // Output: components with normalized absolute paths, sorted by name
  * ```
  */
-function transformAndSortComponents(components: ComponentDocs, inputDir: string): ComponentDocApi[] {
-  return Array.from(components, ([_moduleName, component]) => ({
-    ...component,
-    filePath: normalizeSeparators(path.join(inputDir, path.normalize(component.filePath))),
-  })).sort((a, b) => a.moduleName.localeCompare(b.moduleName));
+function transformAndSortComponents(
+  components: ComponentDocs,
+  inputDir: string,
+  debug?: boolean,
+): ComponentDocApi[] {
+  return Array.from(components, ([_moduleName, component]) => {
+    const base = {
+      ...component,
+      filePath: normalizeSeparators(path.join(inputDir, path.normalize(component.filePath))),
+    };
+    if (!debug && "extractionMode" in base) {
+      const { extractionMode: _, ...rest } = base;
+      return rest as ComponentDocApi;
+    }
+    return base;
+  }).sort((a, b) => a.moduleName.localeCompare(b.moduleName, "en"));
 }
 
 /**
@@ -62,13 +82,13 @@ function transformAndSortComponents(components: ComponentDocs, inputDir: string)
  * ```
  */
 async function writeJsonComponents(components: ComponentDocs, options: WriteJsonOptions) {
-  const output = transformAndSortComponents(components, options.inputDir);
+  const output = transformAndSortComponents(components, options.inputDir, options.debug);
 
   await Promise.all(
     output.map((c) => {
       const outFile = path.resolve(path.join(options.outDir || "", `${c.moduleName}.api.json`));
       const writer = createJsonWriter();
-      console.log(`created ${outFile}"\n`);
+      console.log(`created ${outFile}\n`);
       return writer.write(outFile, JSON.stringify(c));
     }),
   );
@@ -95,8 +115,14 @@ async function writeJsonComponents(components: ComponentDocs, options: WriteJson
 async function writeJsonLocal(components: ComponentDocs, options: WriteJsonOptions) {
   const output: JsonOutput = {
     total: components.size,
-    components: transformAndSortComponents(components, options.inputDir),
+    components: transformAndSortComponents(components, options.inputDir, options.debug),
   };
+  if (options.debug) {
+    output.schemaVersion = SCHEMA_VERSION;
+    if (options.warnings?.length) {
+      output.warnings = options.warnings;
+    }
+  }
 
   const output_path = path.join(process.cwd(), options.outFile);
   const writer = createJsonWriter();

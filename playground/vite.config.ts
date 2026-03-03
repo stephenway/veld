@@ -1,15 +1,16 @@
 import { svelte, vitePreprocess } from "@sveltejs/vite-plugin-svelte";
-import { optimizeCss, optimizeImports } from "carbon-preprocess-svelte";
 import { defineConfig } from "vite";
 
 export default defineConfig({
   plugins: [
     svelte({
-      preprocess: [vitePreprocess(), optimizeImports()],
+      preprocess: vitePreprocess(),
+      // svelte-highlight uses Svelte 4 syntax ($$restProps)
+      dynamicCompileOptions: ({ filename }) =>
+        filename.includes("svelte-highlight") ? { runes: false } : {},
     }),
-    optimizeCss(),
   ],
   optimizeDeps: {
-    exclude: ["carbon-components-svelte"],
+    exclude: ["@rasterandstate/majestic-ui"],
   },
 });

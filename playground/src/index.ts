@@ -1,4 +1,5 @@
-import "carbon-components-svelte/css/all.css";
+import "@rasterandstate/majestic-ui/tokens.css";
+import { mount } from "svelte";
 import App from "./App.svelte";
 
-new App({ target: document.body });
+mount(App, { target: document.body });

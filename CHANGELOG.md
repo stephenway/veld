@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+**Added**
+
+- CLI integration tests: run the real CLI against Svelte 5 and legacy workdirs, compare to snapshots
+- `--debug` flag: include `extractionMode` and `warnings` in JSON output (`"legacy"` vs `"svelte5-fallback"`)
+- Structured warnings channel: when Rollup fails (e.g. Svelte 5 syntax), `--debug` JSON includes `warnings: [{ code: "SVELTE5_COMPILE_FAILED", message, file }]`
+- `bun run update-goldens` script to update fixture and CLI snapshots
+- Svelte 5 runes support: extract prop documentation from `$props()` destructuring
+  - Supports `let { foo = 123 }: Props = $props()` with interface or inline type
+  - Supports `Snippet` typed children
+  - Ignores `$derived` / `$derived.by` / `$state` (not documented as props)
+  - Handles destructuring renames (`{ long: short }` → doc name is `long`)
+  - Ignores rest element (`...rest`)
+  - Computed defaults (e.g. `id = crypto.randomUUID()`) represented as expression string
+  - Auto-detects Svelte 5 syntax; no feature flag required
+  - JSDoc descriptions from interface/type property signatures
+  - Existing Svelte 3/4 fixtures and outputs unchanged
+
+**Fixed**
+
+- JSDoc association: comments no longer mis-attach to the wrong property when multiple props have JSDoc blocks; scan stops at previous property signature
+
 ## [0.26.2](https://github.com/carbon-design-system/sveld/releases/tag/v0.26.2) - 2026-02-16
 
 **Fixes**
@@ -411,7 +434,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.13.0](https://github.com/carbon-design-system/sveld/releases/tag/v0.13.0) - 2022-01-22
 
-- export `sveld` for programmatic usage
+- export `veld` for programmatic usage
 - upgrade prettier, rollup, svelte, svelte-preprocess, typescript
 
 ## [0.12.1](https://github.com/carbon-design-system/sveld/releases/tag/v0.12.1) - 2022-01-20

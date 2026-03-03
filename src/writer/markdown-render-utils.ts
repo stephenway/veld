@@ -65,16 +65,19 @@ function renderSectionIfNotEmpty<TItem>(
  * @param component - The component documentation to render
  */
 function renderComponent(document: MarkdownDocument, component: ComponentDocApi) {
-  document.append("h2", `\`${component.moduleName}\``);
+  const { props = [], slots = [], events = [], typedefs = [] } = component;
+  const moduleName = component.moduleName ?? "Component";
+
+  document.append("h2", `\`${moduleName}\``);
 
   /**
    * Render typedefs section if the component has any type definitions.
    */
-  if (component.typedefs.length > 0) {
+  if (typedefs.length > 0) {
     document.append("h3", "Types").append(
       "raw",
       `\`\`\`ts\n${getTypeDefs({
-        typedefs: component.typedefs,
+        typedefs,
       })}\n\`\`\`\n\n`,
     );
   }
@@ -84,9 +87,9 @@ function renderComponent(document: MarkdownDocument, component: ComponentDocApi)
    * Props are sorted with reactive props first, then constants last.
    */
   document.append("h3", "Props");
-  renderSectionIfNotEmpty(document, component.props, () => {
+  renderSectionIfNotEmpty(document, props, () => {
     document.append("raw", PROP_TABLE_HEADER);
-    const sortedProps = [...component.props].sort((a) => {
+    const sortedProps = [...props].sort((a) => {
       if (a.reactive) return -1;
       if (a.constant) return 1;
       return 0;
@@ -108,9 +111,9 @@ function renderComponent(document: MarkdownDocument, component: ComponentDocApi)
    * Includes slot name, default status, props, and fallback content.
    */
   document.append("h3", "Slots");
-  renderSectionIfNotEmpty(document, component.slots, () => {
+  renderSectionIfNotEmpty(document, slots, () => {
     document.append("raw", SLOT_TABLE_HEADER);
-    for (const slot of component.slots) {
+    for (const slot of slots) {
       document.append(
         "raw",
         `| ${slot.default ? MD_TYPE_UNDEFINED : slot.name} | ${slot.default ? "Yes" : "No"} | ${formatSlotProps(
@@ -125,9 +128,9 @@ function renderComponent(document: MarkdownDocument, component: ComponentDocApi)
    * Includes event name, type (dispatched/forwarded), detail type, and description.
    */
   document.append("h3", "Events");
-  renderSectionIfNotEmpty(document, component.events, () => {
+  renderSectionIfNotEmpty(document, events, () => {
     document.append("raw", EVENT_TABLE_HEADER);
-    for (const event of component.events) {
+    for (const event of events) {
       document.append(
         "raw",
         `| ${event.name} | ${event.type} | ${

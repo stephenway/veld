@@ -2,18 +2,18 @@
   "type": "module",
   "private": true,
   "scripts": {
+    "setup": "bun install",
     "dev": "bun --bun vite",
     "build": "bun --bun vite build",
     "preview": "bun --bun vite preview"
   },
   "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^3.1.2",
+    "@sveltejs/vite-plugin-svelte": "^4.0.0",
     "@types/codemirror": "^5.60.17",
-    "carbon-components-svelte": "^0.99.3",
-    "carbon-preprocess-svelte": "^0.11.25",
+    "@rasterandstate/majestic-ui": "^0.1.0",
     "codemirror": "^5.65.20",
     "prettier": "^3.7.4",
-    "svelte": "^4.2.20",
+    "svelte": "^5.0.0",
     "svelte-highlight": "^7.9.0",
     "typescript": "^5.9.3",
     "vite": "^5.4.21"

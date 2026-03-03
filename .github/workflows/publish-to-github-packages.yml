@@ -1,0 +1,44 @@
+# Publish to GitHub Packages when a tag starting with "v" is pushed to remote.
+
+name: Publish to GitHub Packages
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          registry-url: "https://npm.pkg.github.com"
+          scope: "@stephenway"
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: .bun-version
+
+      - name: Install dependencies
+        run: bun ci
+
+      - name: Build package
+        run: bun run build
+
+      - name: Prune package
+        run: bunx culls
+
+      - name: Set package name for GitHub Packages
+        run: npm pkg set name=@stephenway/veld
+
+      - name: Publish to GitHub Packages
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm publish --provenance

@@ -395,7 +395,7 @@ describe("writerTsDefinition", () => {
           ],
           returnType: "number",
           description:
-            "Computes the depth of a tree leaf node relative to <ul role=\"tree\" />\n@example\n```svelte\nimport { computeTreeLeafDepth } from 'carbon-components-svelte/TreeView/TreeViewNode.svelte';\nlet nodeElement;\n$: depth = computeTreeLeafDepth(nodeElement);\n<li bind:this={nodeElement}>Node at depth {depth}</li>\n```",
+            "Computes the depth of a tree leaf node relative to <ul role=\"tree\" />\n@example\n```svelte\nimport { computeTreeLeafDepth } from '@rasterandstate/majestic-ui/TreeView/TreeViewNode.svelte';\nlet nodeElement;\n$: depth = computeTreeLeafDepth(nodeElement);\n<li bind:this={nodeElement}>Node at depth {depth}</li>\n```",
         },
       ],
       slots: [],

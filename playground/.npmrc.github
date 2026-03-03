@@ -1,0 +1,4 @@
+# Use when @rasterandstate/majestic-ui is on GitHub Packages
+# cp .npmrc.github .npmrc && export NODE_AUTH_TOKEN=... && bun install
+@rasterandstate:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}

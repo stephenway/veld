@@ -1,0 +1,32 @@
+{
+  "props": [
+    {
+      "name": "text",
+      "kind": "let",
+      "constant": false,
+      "type": "string",
+      "description": "The tooltip text to display",
+      "isFunction": false,
+      "isFunctionDeclaration": false,
+      "isRequired": true,
+      "reactive": false
+    },
+    {
+      "name": "children",
+      "kind": "let",
+      "constant": false,
+      "type": "Snippet",
+      "description": "Child content that triggers the tooltip",
+      "isFunction": false,
+      "isFunctionDeclaration": false,
+      "isRequired": true,
+      "reactive": false
+    }
+  ],
+  "moduleExports": [],
+  "slots": [],
+  "events": [],
+  "typedefs": [],
+  "generics": null,
+  "contexts": []
+}

@@ -2,9 +2,9 @@
 import * as fs from "node:fs";
 // biome-ignore lint/performance/noNamespaceImport: needed for jest.spyOn
 import * as path from "node:path";
-import pluginSveld, { generateBundle } from "../src/plugin";
+import pluginVeld, { generateBundle } from "../src/plugin";
 
-describe("pluginSveld", () => {
+describe("pluginVeld", () => {
   const mockCwd = "/mock/project";
 
   beforeEach(() => {
@@ -24,7 +24,7 @@ describe("pluginSveld", () => {
   test("uses explicit entry option when provided", () => {
     jest.spyOn(fs, "existsSync").mockReturnValue(true);
 
-    const plugin = pluginSveld({ entry: "src/CustomEntry.svelte" });
+    const plugin = pluginVeld({ entry: "src/CustomEntry.svelte" });
     plugin.buildStart?.call({});
 
     expect(fs.existsSync).toHaveBeenCalledWith(`${mockCwd}/src/CustomEntry.svelte`);
@@ -34,7 +34,7 @@ describe("pluginSveld", () => {
     jest.spyOn(fs, "existsSync").mockReturnValue(true);
     jest.spyOn(fs, "readFileSync").mockReturnValue(JSON.stringify({ svelte: "src/index.js" }));
 
-    const plugin = pluginSveld();
+    const plugin = pluginVeld();
     plugin.buildStart?.call({});
 
     expect(fs.readFileSync).toHaveBeenCalledWith(`${mockCwd}/package.json`, "utf-8");
@@ -44,7 +44,7 @@ describe("pluginSveld", () => {
     jest.spyOn(fs, "existsSync").mockReturnValue(true);
     jest.spyOn(fs, "readFileSync").mockReturnValue(JSON.stringify({ svelte: "src/index.js" }));
 
-    const plugin = pluginSveld({ entry: "src/Override.svelte" });
+    const plugin = pluginVeld({ entry: "src/Override.svelte" });
     plugin.buildStart?.call({});
 
     expect(fs.existsSync).toHaveBeenCalledWith(`${mockCwd}/src/Override.svelte`);
